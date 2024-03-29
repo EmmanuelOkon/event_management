@@ -1,8 +1,8 @@
-// import CategoryFilter from "@/components/shared/CategoryFilter";
-// import Collection from "@/components/shared/Collection";
-// import Search from "@/components/shared/Search";
+import CategoryFilter from "@/components/shared/CategoryFilter";
+import Collection from "@/components/shared/Collection";
+import Search from "@/components/shared/Search";
 import { Button } from "@/components/ui/button";
-// import { getAllEvents } from "@/lib/actions/event.actions";
+import { getAllEvents } from "@/lib/actions/event.actions";
 import { SearchParamProps } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,12 +13,12 @@ export default async function Home({ searchParams }: SearchParamProps) {
   const category = (searchParams?.category as string) || "";
 
 
-  // const events = await getAllEvents({
-  //   query: searchText,
-  //   category,
-  //   page,
-  //   limit: 6,
-  // });
+  const events = await getAllEvents({
+    query: searchText,
+    category,
+    page,
+    limit: 6,
+  });
 
   return (
     <>
@@ -54,11 +54,11 @@ export default async function Home({ searchParams }: SearchParamProps) {
         </h2>
 
         <div className="flex w-full flex-col gap-5 md:flex-row">
-          {/* <Search /> */}
-          {/* <CategoryFilter /> */}
+          <Search />
+          <CategoryFilter />
         </div>
 
-        {/* <Collection
+        <Collection
           data={events?.data}
           emptyTitle="No Events Found"
           emptyStateSubtext="Please come back later"
@@ -66,7 +66,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
           limit={6}
           page={1}
           totalPages={2}
-        /> */}
+        />
       </section>
     </>
   );
