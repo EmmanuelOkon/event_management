@@ -1,9 +1,11 @@
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+"use client";
+
+import { Show, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import NavItems from "./NavItems";
 import MobileNav from "./MobileNav";
+import NavItems from "./NavItems";
 
 const Header = () => {
   return (
@@ -18,22 +20,22 @@ const Header = () => {
           />
         </Link>
 
-        <SignedIn>
+        <Show when="signed-in">
           <nav className="md:flex-between hidden w-full max-w-xs">
             <NavItems />
           </nav>
-        </SignedIn>
+        </Show>
 
-        <div className="flex items-center w32 justfity-end gap-3">
-          <SignedIn>
-            <UserButton afterSignOutUrl="/" />
+        <div className="flex items-center gap-3">
+          <Show when="signed-in">
+            <UserButton />
             <MobileNav />
-          </SignedIn>
-          <SignedOut>
+          </Show>
+          <Show when="signed-out">
             <Button asChild className="rounded-md" size="lg">
               <Link href="/sign-in">Login</Link>
             </Button>
-          </SignedOut>
+          </Show>
         </div>
       </div>
     </header>

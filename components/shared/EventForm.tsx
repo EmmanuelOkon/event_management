@@ -6,37 +6,35 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { eventFormSchema } from "@/lib/validator";
 
-import { IEvent } from "@/lib/database/models/event.model";
-import * as z from "zod";
 import { eventDefaultValues } from "@/constants";
-import Dropdown from "./Dropdown";
-import { Textarea } from "../ui/textarea";
-import { FileUploader } from "./FileUploader";
-import { useState } from "react";
-import Image from "next/image";
-import DatePicker from "react-datepicker";
 import { useUploadThing } from "@/lib/uploadthing";
+import type { Event as EventType } from "@/types";
+import Image from "next/image";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import * as z from "zod";
+import { Textarea } from "../ui/textarea";
+import Dropdown from "./Dropdown";
+import { FileUploader } from "./FileUploader";
 
+import { createEvent, updateEvent } from "@/lib/actions/event.actions";
+import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
 import { Checkbox } from "../ui/checkbox";
-import { useRouter } from "next/navigation";
-import { createEvent, updateEvent } from "@/lib/actions/event.actions";
 
-import { notifySuccess, notifyError } from "../shared/Toast";
+import { notifyError, notifySuccess } from "../shared/Toast";
 
 type EventFormProps = {
   userId: string;
   type: "Create" | "Update";
-  event?: IEvent;
+  event?: EventType;
   eventId?: string;
 };
 
@@ -53,16 +51,20 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
   const router = useRouter();
 
-  const { startUpload } = useUploadThing("imageUploader");
+  const { startUpload, routeConfig } = useUploadThing("imageUploader");
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: initialValues,
   });
 
+  console.log("submit:", form.formState.errors);
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
+    console.log("submit:", values);
 
     let uploadedImageUrl = values.imageUrl;
+
+    console.log("button click", uploadedImageUrl);
 
     if (files.length > 0) {
       const uploadedImages = await startUpload(files);
@@ -70,6 +72,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
       if (!uploadedImages) {
         return;
       }
+      console.log("uploadedImages", uploadedImages);
       uploadedImageUrl = uploadedImages[0].url;
     }
 
@@ -90,13 +93,16 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           form.reset();
           router.push(`/events/${newEvent._id}`);
         }
-      } catch (error) { 
-        notifyError("Error Creating Event", {
-          position: "top-right",
-          autoClose: 3000,
-          pauseOnHover: false,
-          })
+      } catch (error) {
         console.error(error);
+        notifyError(
+          error instanceof Error ? error.message : "Error Creating Event",
+          {
+            position: "top-right",
+            autoClose: 3000,
+            pauseOnHover: false,
+          },
+        );
       }
     }
     if (type === "Update") {
@@ -121,16 +127,18 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           router.push(`/events/${updatedEvent._id}`);
         }
       } catch (error) {
-        notifyError("Error Updating Event", {
-          position: "top-right",
-          autoClose: 3000,
-          pauseOnHover: false,
-        });
         console.error(error);
+        notifyError(
+          error instanceof Error ? error.message : "Error Updating Event",
+          {
+            position: "top-right",
+            autoClose: 3000,
+            pauseOnHover: false,
+          },
+        );
       }
     }
   }
-
 
   return (
     <Form {...form}>
@@ -199,6 +207,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                     onFieldChange={field.onChange}
                     imageUrl={field.value}
                     setFiles={setFiles}
+                    routeConfig={routeConfig}
                   />
                 </FormControl>
                 <FormMessage />
@@ -255,7 +264,11 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                     </p>
                     <DatePicker
                       selected={field.value}
-                      onChange={(date: Date) => field.onChange(date)}
+                      onChange={(date: Date | null) => {
+                        if (date) {
+                          field.onChange(date);
+                        }
+                      }}
                       showTimeSelect
                       timeInputLabel="Time:"
                       dateFormat="dd-MM-yyyy h:mm aa"
@@ -287,7 +300,11 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                     </p>
                     <DatePicker
                       selected={field.value}
-                      onChange={(date: Date) => field.onChange(date)}
+                      onChange={(date: Date | null) => {
+                        if (date) {
+                          field.onChange(date);
+                        }
+                      }}
                       showTimeSelect
                       timeInputLabel="Time:"
                       dateFormat="dd-MM-yyyy h:mm aa"

@@ -1,10 +1,10 @@
 "use client";
 
+import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
-import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
-import { useRouter, useSearchParams } from "next/navigation";
 
 const Search = ({
   placeholder = "Search title...",
@@ -17,22 +17,33 @@ const Search = ({
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+      const paramsString = searchParams.toString();
+      const hasQueryParam = searchParams.has("query");
+
+      if (!query && !hasQueryParam) {
+        return;
+      }
+
       let newUrl = "";
 
       if (query) {
         newUrl = formUrlQuery({
-          params: searchParams.toString(),
+          params: paramsString,
           key: "query",
           value: query,
         });
       } else {
         newUrl = removeKeysFromQuery({
-          params: searchParams.toString(),
+          params: paramsString,
           keysToRemove: ["query"],
         });
       }
 
-      router.push(newUrl, { scroll: false });
+      const currentUrl = `${window.location.pathname}${paramsString ? `?${paramsString}` : ""}`;
+
+      if (newUrl !== currentUrl) {
+        router.push(newUrl, { scroll: false });
+      }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);

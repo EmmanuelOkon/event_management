@@ -10,6 +10,18 @@ const nextConfig = {
       },
     ],
   },
+
+  turbopack: {
+    rules: {
+      "*.md": {
+        loaders: ["raw-loader"],
+        as: "*.js",
+      },
+    },
+  },
+
+  // If the error persists, you can explicitly tell Next to transpile it
+  transpilePackages: ["uploadthing", "@uploadthing/react"],
 };
 
 export default nextConfig;

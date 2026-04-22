@@ -5,19 +5,29 @@ import {
   getRelatedEventsByCategory,
 } from "@/lib/actions/event.actions";
 import { formatDateTime } from "@/lib/utils";
-import { SearchParamProps } from "@/types";
 import Image from "next/image";
 
-const EventDetails = async ({
-  params: { id },
-  searchParams,
-}: SearchParamProps) => {
+type EventDetailsProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
+  const [resolvedParams, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const id = resolvedParams?.id;
+
+  if (!id) {
+    throw new Error("Event id is required");
+  }
   const event = await getEventById(id);
 
   const relatedEvents = await getRelatedEventsByCategory({
     categoryId: event.category._id,
     eventId: event._id,
-    page: searchParams.page as string,
+    page: resolvedSearchParams.page as string,
   });
 
   return (
@@ -57,7 +67,7 @@ const EventDetails = async ({
                 </div>
               </div>
 
-              <CheckoutButton event={event}  />
+              <CheckoutButton event={event} />
 
               <div className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2 md:gap-3">
@@ -122,7 +132,7 @@ const EventDetails = async ({
           emptyStateSubtext="Come back later"
           collectionType="All_Events"
           limit={3}
-          page={searchParams.page as string}
+          page={resolvedSearchParams.page as string}
           totalPages={relatedEvents?.totalPages}
         />
       </section>

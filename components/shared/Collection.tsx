@@ -1,10 +1,9 @@
-import { IEvent } from "@/lib/database/models/event.model";
-import React from "react";
+import type { Event as EventType } from "@/types";
 import Card from "./Card";
 import Pagination from "./Pagination";
 
 type CollectionProps = {
-  data: IEvent[];
+  data: EventType[];
   emptyTitle: string;
   emptyStateSubtext: string;
   limit: number;
@@ -33,7 +32,7 @@ const Collection = ({
               const hidePrice = collectionType === "My_Tickets";
 
               return (
-                <li key={event._id} className="flex justify-center">
+                <li key={event._id.toString()} className="flex justify-center">
                   <Card
                     event={event}
                     hasOrderLink={hasOrderLink}
