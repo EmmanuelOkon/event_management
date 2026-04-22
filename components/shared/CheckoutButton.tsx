@@ -1,7 +1,7 @@
 "use client";
 
 import { IEvent } from "@/lib/database/models/event.model";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { Show, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import Checkout from "./Checkout";
@@ -19,15 +19,15 @@ const CheckoutButton = ({ event }: { event: IEvent }) => {
         </p>
       ) : (
         <>
-          <SignedOut>
+          <Show when="signed-out">
             <Button asChild className="button rounded-md" size="lg">
               <Link href="/sign-in">Get Tickets</Link>
             </Button>
-          </SignedOut>
+          </Show>
 
-          <SignedIn>
+          <Show when="signed-in">
             <Checkout event={event} userId={userId} />
-          </SignedIn>
+          </Show>
         </>
       )}
     </div>

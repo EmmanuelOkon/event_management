@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { Button } from "../ui/button";
 import { IEvent } from "@/lib/database/models/event.model";
+import { useEffect } from "react";
+import { Button } from "../ui/button";
 
-import { loadStripe } from "@stripe/stripe-js";
 import { checkoutOrder } from "@/lib/actions/order.actions";
+import { loadStripe } from "@stripe/stripe-js";
 
 loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -17,7 +17,7 @@ const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
 
     if (query.get("canceled")) {
       console.log(
-        "Order canceled -- continue to shop around and checkout when you’re ready."
+        "Order canceled -- continue to shop around and checkout when you’re ready.",
       );
     }
   }, []);
@@ -25,7 +25,7 @@ const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
   const onCheckout = async () => {
     const order = {
       eventTitle: event.title,
-      eventId: event._id,
+      eventId: event._id.toString(),
       price: event.price,
       isFree: event.isFree,
       buyerId: userId,

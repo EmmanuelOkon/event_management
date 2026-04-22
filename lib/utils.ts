@@ -1,9 +1,9 @@
 import { type ClassValue, clsx } from "clsx";
 
-import { twMerge } from "tailwind-merge";
 import qs from "query-string";
+import { twMerge } from "tailwind-merge";
 
-import { UrlQueryParams, RemoveUrlQueryParams } from "@/types";
+import { RemoveUrlQueryParams, UrlQueryParams } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -34,17 +34,17 @@ export const formatDateTime = (dateString: Date) => {
 
   const formattedDateTime: string = new Date(dateString).toLocaleString(
     "en-US",
-    dateTimeOptions
+    dateTimeOptions,
   );
 
   const formattedDate: string = new Date(dateString).toLocaleString(
     "en-US",
-    dateOptions
+    dateOptions,
   );
 
   const formattedTime: string = new Date(dateString).toLocaleString(
     "en-US",
-    timeOptions
+    timeOptions,
   );
 
   return {
@@ -76,7 +76,7 @@ export function formUrlQuery({ params, key, value }: UrlQueryParams) {
       url: window.location.pathname,
       query: currentUrl,
     },
-    { skipNull: true }
+    { skipNull: true },
   );
 }
 
@@ -95,11 +95,11 @@ export function removeKeysFromQuery({
       url: window.location.pathname,
       query: currentUrl,
     },
-    { skipNull: true }
+    { skipNull: true },
   );
 }
 
 export const handleError = (error: unknown) => {
   console.error(error);
-  // throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+  throw new Error(typeof error === "string" ? error : JSON.stringify(error));
 };

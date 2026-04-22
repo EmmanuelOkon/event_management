@@ -16,6 +16,9 @@ export const eventFormSchema = z
     endDateTime: z.date(),
     categoryId: z.string(),
     price: z.string(),
+    // price: z.string().refine((val) => val.length > 0, {
+    //   message: "Input ticket price for event",
+    // }),
     isFree: z.boolean(),
     url: z.string().url(),
   })

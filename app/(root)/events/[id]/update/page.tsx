@@ -1,14 +1,14 @@
 import EventForm from "@/components/shared/EventForm";
 import { getEventById } from "@/lib/actions/event.actions";
-import { UpdateEventParams } from "@/types";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 type UpdateEventProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-const UpdateEvent = async ({ params: { id } }: UpdateEventProps) => {
-  const { sessionClaims } = auth();
+const UpdateEvent = async ({ params }: UpdateEventProps) => {
+  const { id } = await params;
+  const { sessionClaims } = await auth();
 
   const userId = sessionClaims?.userId as string;
 
