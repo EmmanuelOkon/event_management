@@ -1,6 +1,6 @@
 import type { Event as EventType } from "@/types";
 import Card from "./Card";
-import Pagination from "./Pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 type CollectionProps = {
   data: EventType[];
@@ -45,15 +45,15 @@ const Collection = ({
 
           {totalPages > 1 && (
             <Pagination
+              currentPage={Number(page)}
               urlParamName={urlParamName}
-              page={page}
               totalPages={totalPages}
             />
           )}
         </div>
       ) : (
-        <div className="flex-center wrapper min-h-[200px] w-full flex-col gap-3 rounded-[14px] bg-grey-50 py-28 text-center">
-          <h3 className="p-bold-20 md:h5-bold">{emptyTitle}</h3>
+        <div className="flex-center wrapper border  min-h-25 w-full flex-col gap-3 border-dashed bg-grey-50 py-28 text-center">
+          <h3 className="text-2xl md:h5-bold font-serif">{emptyTitle}</h3>
           <p className="p-regular-14">{emptyStateSubtext}</p>
         </div>
       )}

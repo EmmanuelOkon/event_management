@@ -3,6 +3,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import Providers from "@/components/providers";
 
 import "./globals.css";
 
@@ -13,8 +14,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Evently",
-  description: "Evently is a platform for event management.",
+  title: "Evoria",
+  description: "Evoria is a platform for event management.",
   icons: {
     icon: "/assets/images/logo.svg",
   },
@@ -29,8 +30,11 @@ export default async function RootLayout({
     <>
       <ClerkProvider>
         <html lang="en">
-          <body suppressHydrationWarning={true} className={poppins.className}>
-            {children}
+          <body
+            suppressHydrationWarning={true}
+            className={`${poppins.className} ${poppins.variable}`}
+          >
+            <Providers>{children}</Providers>
           </body>
         </html>
       </ClerkProvider>

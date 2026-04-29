@@ -1,87 +1,105 @@
-import { formatDateTime } from "@/lib/utils";
 import type { Event as EventType } from "@/types";
 import { auth } from "@clerk/nextjs/server";
-import Image from "next/image";
 import Link from "next/link";
 import { DeleteConfirmation } from "./DeleteConfirmation";
+import { MotionDiv } from "./MotionWrapper";
+import { Edit, Trash2 } from "lucide-react";
 
 type CardProps = {
   event: EventType;
   hasOrderLink?: boolean;
   hidePrice?: boolean;
+  index?: number;
 };
 
-const Card = async ({ event, hasOrderLink, hidePrice }: CardProps) => {
+const Card = async ({
+  event,
+  hasOrderLink,
+  hidePrice,
+  index = 0,
+}: CardProps) => {
   const { sessionClaims } = await auth();
   const userId = sessionClaims?.userId as string;
 
   const isEventCreator = userId === event.organizer._id.toString();
 
   return (
-    <div className="group relative flex min-h-[380px] w-full max-w-[400px] flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-lg md:min-h-[438px]">
+    <MotionDiv
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: Math.min(index, 8) * 0.04 }}
+      className="group relative flex min-h-[380px] w-full max-w-[400px] flex-col overflow-hidden bg-white card-border md:min-h-[438px] transition-all duration-300 hover:-translate-y-1"
+    >
       <Link
         href={`/events/${event._id}`}
         style={{ backgroundImage: `url(${event.imageUrl})` }}
-        className="flex-center flex-grow bg-gray-50 bg-cover bg-center text-grey-500"
-      />
-      {/* IS EVENT CREATOR ... */}
+        className="flex-center h-64 bg-gray-50 bg-cover bg-center text-grey-500 grayscale transition-all group-hover:grayscale-0"
+      >
+        <div className="absolute top-4 left-4 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-black/10">
+          {new Date(event.startDateTime).toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+          })}
+        </div>
+      </Link>
 
+      {/* IS EVENT CREATOR ... */}
       {isEventCreator && !hidePrice && (
-        <div className="absolute right-2 top-2 flex flex-col gap-4 rounded-xl bg-white p-3 shadow-sm transition-all">
-          <Link href={`/events/${event._id}/update`}>
-            <Image
-              src="/assets/icons/edit.svg"
-              alt="edit"
-              width={20}
-              height={20}
-            />
+        <div className="absolute right-4 top-4 flex flex-col gap4 bg-white  backdrop-blur-sm divide-y divide-black border border-black shadow-sm transition-all">
+          <Link
+            href={`/events/${event._id}/update`}
+            className="hover:bg-primary/50 p-3 text-gray-500 hover:text-primary transition-all"
+          >
+            <Edit className="h-4 w-4 " />
           </Link>
 
           <DeleteConfirmation eventId={event._id} />
         </div>
       )}
 
-      <div className="flex min-h-[230px] flex-col gap-3 p-5 md:gap-4">
+      <div className="flex flex-col gap-3 p-4">
         {!hidePrice && (
-          <div className="flex gap-2">
-            <span className="p-semibold-14 w-min rounded-md bg-green-100 px-4 py-1 text-green-60">
-              {event.isFree ? "FREE" : `$${event.price}`}
-            </span>
-            <p className="p-semibold-14 w-min rounded-md bg-grey-500/10 px-4 py-1 text-grey-500 line-clamp-1">
-              {event.category.name}
-            </p>
+          <div className="flex justify-between items-center mb-2">
+            <span className="badge-editorial">{event.category.name}</span>
           </div>
         )}
 
-        <p className="p-medium-16 p-medium-18 text-grey-500">
-          {formatDateTime(event.startDateTime).dateTime}
-        </p>
-
-        <Link href={`/events/${event._id}`}>
-          <p className="p-medium-16 md:p-medium-20 line-clamp-2 flex-1 text-black">
+        <Link href={`/events/${event._id}`} className="w-fit">
+          <p className="font-serif text-xl md:text-2xl font-bold leading-tight line-clamp-2 flex-1 text-black hover:underline underline-offset-4">
             {event.title}
           </p>
         </Link>
 
-        <div className="flex-between w-full">
-          <p className="p-medium-14 md:p-medium-16 text-grey-600">
-            {event.organizer.firstName} {event.organizer.lastName}
+        <div className="flex flex-col gap-2 mt-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500">
+            {event.location} &bull;{" "}
+            {event.isFree ? "Complimentary" : `$${event.price}`}
           </p>
 
-          {hasOrderLink && (
-            <Link href={`/orders?eventId=${event._id}`} className="flex gap-2">
-              <p className="text-primary-500">Order Details</p>
-              <Image
-                src="/assets/icons/arrow.svg"
-                alt="search"
-                width={10}
-                height={10}
-              />
-            </Link>
-          )}
+          <div className="flex-between w-full mt-4 border-t border-gray-100 pt-4">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              By {event.organizer.firstName} {event.organizer.lastName}
+            </span>
+
+            {hasOrderLink ? (
+              <Link
+                href={`/orders?eventId=${event._id}`}
+                className="text-[11px] font-bold underline uppercase tracking-tighter"
+              >
+                Order Details
+              </Link>
+            ) : (
+              <Link
+                href={`/events/${event._id}`}
+                className="text-[11px] font-bold underline uppercase tracking-tighter"
+              >
+                Details
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </MotionDiv>
   );
 };
 

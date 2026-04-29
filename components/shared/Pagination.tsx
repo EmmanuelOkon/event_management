@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { Button } from "../ui/button";
 import { formUrlQuery } from "@/lib/utils";
+import { useProgress } from "@bprogress/react";
 
 type PaginationProps = {
   page: number | string;
@@ -14,6 +15,7 @@ type PaginationProps = {
 const Pagination = ({ page, totalPages, urlParamName }: PaginationProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { start } = useProgress();
 
   const onClick = (btnType: string) => {
     const pageValue = btnType === "next" ? Number(page) + 1 : Number(page) - 1;
@@ -24,6 +26,7 @@ const Pagination = ({ page, totalPages, urlParamName }: PaginationProps) => {
       value: pageValue.toString(),
     });
 
+    start();
     router.push(newUrl, { scroll: false });
   };
 

@@ -1,7 +1,13 @@
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import Image from "next/image";
 import { Separator } from "../ui/separator";
 import NavItems from "./NavItems";
+import { X } from "lucide-react";
 
 const MobileNav = () => {
   return (
@@ -16,13 +22,18 @@ const MobileNav = () => {
             className="cursor-pointer"
           />
         </SheetTrigger>
-        <SheetContent className="flex flex-col gap-6 bg-white md:hidden">
-          <Image
-            src="/assets/images/logo.svg"
-            alt="logo"
-            width={128}
-            height={38}
-          />
+        <SheetContent className="flex flex-col gap-6 bg-white md:hidden p-4 border-accent ">
+          <div className="flex items-center justify-between">
+            <Image
+              src="/assets/images/logo.svg"
+              alt="logo"
+              width={118}
+              height={38}
+            />
+            <SheetClose className="cursor-pointer transition-all duration-300 hover:text-destructive">
+              <X className="h-5 w-5" />
+            </SheetClose>
+          </div>
           <Separator className="border border-gray-50" />
           <NavItems />
         </SheetContent>

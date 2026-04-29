@@ -109,7 +109,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
               </div>
 
               <div className="flex flex-col gap-2">
-                <p className="p-bold-20 text-grey-600">What You'll Learn:</p>
+                <p className="p-bold-20 text-grey-600">What You&apos;ll Learn:</p>
                 <p className="p-medium-16 lg:p-regular-18">
                   {event.description}
                 </p>
@@ -128,8 +128,8 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
 
         <Collection
           data={relatedEvents?.data}
-          emptyTitle="No Events Found"
-          emptyStateSubtext="Come back later"
+          emptyTitle="No events match."
+          emptyStateSubtext="Try a different category or clear your search."
           collectionType="All_Events"
           limit={3}
           page={resolvedSearchParams.page as string}

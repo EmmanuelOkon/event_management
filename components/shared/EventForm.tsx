@@ -25,6 +25,7 @@ import Dropdown from "./Dropdown";
 import { FileUploader } from "./FileUploader";
 
 import { createEvent, updateEvent } from "@/lib/actions/event.actions";
+import { useProgress } from "@bprogress/react";
 import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
 import { Checkbox } from "../ui/checkbox";
@@ -50,6 +51,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
       : eventDefaultValues;
 
   const router = useRouter();
+  const { start } = useProgress();
 
   const { startUpload, routeConfig } = useUploadThing("imageUploader");
 
@@ -91,6 +93,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
             pauseOnHover: false,
           });
           form.reset();
+          start();
           router.push(`/events/${newEvent._id}`);
         }
       } catch (error) {
@@ -107,6 +110,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
     }
     if (type === "Update") {
       if (!eventId) {
+        start();
         router.back();
         return;
       }
@@ -124,6 +128,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
             pauseOnHover: false,
           });
           form.reset();
+          start();
           router.push(`/events/${updatedEvent._id}`);
         }
       } catch (error) {
