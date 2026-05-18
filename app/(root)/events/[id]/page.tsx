@@ -90,7 +90,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
       </MotionDiv>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-8">
+        <div className="space-y-8 order-2lg:order-1">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="rounded-sm">
@@ -129,6 +129,112 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
 
           <Separator />
 
+          <aside className="lg:hidden">
+            <div className="rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+              <div className="mb-4 flex items-baseline gap-1">
+                <span
+                  className={`${hasEventFinished ? "line-through text-ring" : ""} font-display text-3xl font-semibold`}
+                >
+                  {event?.price ? "" : "Free"}{" "}
+                  {event.price ? formatPrice(event.price) : ""}
+                </span>
+
+                {!event.isFree && (
+                  <span className="text-xs text-muted-foreground">
+                    per ticket
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <Calendar className="mt-0.5 h-4 w-4 text-accent" />
+                  <div>
+                    <p className="font-medium">
+                      {formatDateLong(event.startDateTime)}
+                    </p>
+                    <p className="text-muted-foreground">
+                      <Clock className="mr-1 inline h-3 w-3" />
+                      {formatTime(event.startDateTime)} –{" "}
+                      {formatTime(event.endDateTime)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-4 w-4 text-accent" />
+                  <p>{event.location}</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Users className="mt-0.5 h-4 w-4 text-accent" />
+                  <p>
+                    {event.attendeesCount} going ·{" "}
+                    {event.capacity - event.attendeesCount} spots left
+                  </p>
+                </div>
+                <CheckoutButton event={event} />
+              </div>
+
+              {isOrganizer && (
+                <>
+                  <Separator className="my-5" />
+                  <p className="mb-3 text-xs uppercase tracking-wide text-muted-foreground">
+                    Organizer tools
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="flex-1 rounded-none hover:bg-accent-foreground border border-border hover:border-blue-500 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-500 text-sm"
+                    >
+                      <Link href={`/events/${event._id}/update`}>
+                        <Pencil className="mr-1 h-4 w-4" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="flex-1 text-destructive rounded-none text-sm hover:bg-destructive/10 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out hover:text-destructive"
+                        >
+                          <Trash2 className="mr-1 h-4 w-4" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Delete this event?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently remove{" "}
+                            <span className="font-semibold text-black">
+                              {event.title}
+                            </span>
+                            . This cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="hover:bg-muted-foreground rounded-none cursor-pointer transition-all duration-300 ease-in-out">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            // onClick={handleDelete}
+                            className="bg-destructive text-white rounded-none cursor-pointer hover:bg-red-700 transition-all duration-300 ease-in-out"
+                          >
+                            Delete event
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </>
+              )}
+            </div>
+          </aside>
+
+          <Separator />
+
           <section className="my-8 flexflex-col gap-8 md:gap-12">
             <h2 className="h2-bold">Related Events</h2>
 
@@ -146,13 +252,14 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
         </div>
 
         {/* Side card */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
             <div className="mb-4 flex items-baseline gap-1">
               <span
                 className={`${hasEventFinished ? "line-through text-ring" : ""} font-display text-3xl font-semibold`}
               >
-                {formatPrice(event.price)}
+                {event?.price ? "" : "Free"}{" "}
+                {event.price ? formatPrice(event.price) : ""}
               </span>
 
               {!event.isFree && (

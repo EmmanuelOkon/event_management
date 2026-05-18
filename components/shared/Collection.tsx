@@ -1,6 +1,6 @@
+import { Pagination } from "@/components/ui/pagination";
 import type { Event as EventType } from "@/types";
 import Card from "./Card";
-import { Pagination } from "@/components/ui/pagination";
 
 type CollectionProps = {
   data: EventType[];
@@ -26,7 +26,7 @@ const Collection = ({
     <>
       {data.length > 0 ? (
         <div className="flex flex-col items-center gap-10 mt-3">
-          <ul className="grid w-full grid-cols1 gap-5 sm:grid-cols-2lg: grid-cols-3 xl:gap-10">
+          <ul className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10">
             {data.map((event) => {
               const hasOrderLink = collectionType === "Events_Organized";
               const hidePrice = collectionType === "My_Tickets";
