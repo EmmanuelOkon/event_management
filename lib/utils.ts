@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+import { format, formatDistanceToNow } from "date-fns";
 
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
@@ -65,6 +66,13 @@ export const formatPrice = (price: string) => {
 
   return formattedPrice;
 };
+
+export const formatTime = (iso: string) => format(new Date(iso), "h:mm a");
+export const formatDateLong = (iso: string) =>
+  format(new Date(iso), "EEEE, MMMM d, yyyy");
+export const formatRelative = (iso: string) =>
+  formatDistanceToNow(new Date(iso), { addSuffix: true });
+
 
 export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   const currentUrl = qs.parse(params);

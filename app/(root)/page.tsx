@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
             {/* Discover <br /> Thousands of Events and go Beyond Boundaries! */}
             {/* <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl"> */}
             Discover Events, <br />{" "}
-            <span className="text-accent">Near and Far people</span>
+            <span className="text-accent">Near and Far</span>
             {/* </h1> */}
           </h2>
           <p className="text-lg text-gray-600">

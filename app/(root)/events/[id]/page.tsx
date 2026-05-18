@@ -1,11 +1,32 @@
 import CheckoutButton from "@/components/shared/CheckoutButton";
 import Collection from "@/components/shared/Collection";
+import { MotionDiv } from "@/components/shared/MotionWrapper";
 import {
   getEventById,
   getRelatedEventsByCategory,
 } from "@/lib/actions/event.actions";
+// import User from "@/lib/database/models/user.model";
 import { formatDateTime } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Calendar, Clock, MapPin, Pencil, Trash2, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { formatDateLong, formatPrice, formatTime } from "@/lib/utils";
+import Link from "next/link";
 
 type EventDetailsProps = {
   params: Promise<{ id: string }>;
@@ -17,12 +38,33 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
     params,
     searchParams,
   ]);
+  const { sessionClaims } = await auth();
+  const userId = sessionClaims?.userId as string;
   const id = resolvedParams?.id;
 
   if (!id) {
     throw new Error("Event id is required");
   }
   const event = await getEventById(id);
+  const hasEventFinished = new Date(event.endDateTime) < new Date();
+
+  // Get current user session
+  // const { userId: clerkId } = auth();
+
+  // Get current user's MongoDB ID from database
+  // let currentUserId = null;
+  // if (clerkId) {
+  //   await connectToDatabase();
+  //   const currentUser = await User.findOne({ clerkId });
+  //   currentUserId = currentUser?._id?.toString();
+  // }
+
+  // Check if current user is the event organizer
+  const isOrganizer = userId === event?.organizer?._id;
+
+  console.log("organizer", event?.organizer?._id);
+  console.log("currentUserId", userId);
+  console.log("isOrganizer", isOrganizer);
 
   const relatedEvents = await getRelatedEventsByCategory({
     categoryId: event.category._id,
@@ -30,113 +72,182 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
     page: resolvedSearchParams.page as string,
   });
 
+  console.log("relatedEvents", event);
+
   return (
-    <>
-      <section className="flex justify-center bg-primary-50 bg-dotted-pattern bg-contain">
-        <main className="wrapper">
-          <h1 className="h1-bold py-2 pb-4">Event Details</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 2xl:max-w-7xl">
-            <Image
-              src={event.imageUrl}
-              alt="hero image"
-              width={1000}
-              height={1000}
-              className="h-full min-h-[300px] object-cover object-center"
-            />
+    <article className="mx-auto max-w-7xl px-6 py-12">
+      <MotionDiv
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="overflow-hidden rounded-lg border border-border"
+      >
+        <img
+          src={event.imageUrl}
+          alt={event.title}
+          className="aspect-[21/9] w-full object-cover"
+        />
+      </MotionDiv>
 
-            <div className="flex w-full flex-col gap-8 py-5 md:p-10">
-              <div className="flex flex-col gap-6">
-                <h2 className="h2-bold">{event.title}</h2>
+      <div className="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr]">
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="rounded-sm">
+                {event.category.name}
+              </Badge>
+            </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="flex gap-3">
-                    <p className="p-bold-20 rounded-md bg-green-500/10 px-5 py-2 text-green-700">
-                      {event.isFree ? "FREE" : `$${event.price}`}
-                    </p>
-                    <p className="p-medium-16 rounded-md bg-grey-500/10 px-4 py-2.5 text-grey-500">
-                      {event.category.name}
-                    </p>
-                  </div>
-
-                  <p className="p-medium-18 ml-2 mt-2 sm:mt-0">
-                    by{" "}
-                    <span className="text-primary-500">
-                      {event.organizer.firstName} {event.organizer.lastName}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <CheckoutButton event={event} />
-
-              <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-2 md:gap-3">
-                  <Image
-                    src="/assets/icons/calendar.svg"
-                    alt="calendar"
-                    width={32}
-                    height={32}
-                    className="inline-block"
-                  />
-                  <div className="p-medium-16 lg:p-regular-20 flex flex-wrap items-center">
-                    From: &nbsp;
-                    <p className="ml-1">
-                      {formatDateTime(event.startDateTime).dateOnly} -{" "}
-                      {formatDateTime(event.startDateTime).timeOnly}
-                    </p>
-                  </div>
-
-                  <div className="p-medium-16 lg:p-regular-20 flex flex-wrap items-center">
-                    To: &nbsp;
-                    <p className="ml-1">
-                      {formatDateTime(event.endDateTime).dateOnly} -{" "}
-                      {formatDateTime(event.endDateTime).timeOnly}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-regular-20 flex items-center gap-3">
-                  <Image
-                    src="/assets/icons/location.svg"
-                    alt="location"
-                    width={32}
-                    height={32}
-                  />
-                  <p className="p-medium-16 lg:p-regular-20">
-                    {event.location}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <p className="p-bold-20 text-grey-600">What You&apos;ll Learn:</p>
-                <p className="p-medium-16 lg:p-regular-18">
-                  {event.description}
-                </p>
-                <p className="p-medium-16 lg:p-regular-18 truncate text-primary-500 underline">
-                  {event.url}
+            <h1 className="font-display text-5xl font-semibold tracking-tight text-balance">
+              {event.title}
+            </h1>
+            <div className="flex items-center gap-3 pt-2">
+              <Avatar className="h-9 w-9">
+                <AvatarImage src={event.organizer.imageUrl} />
+                <AvatarFallback>
+                  {event.organizer.firstName[0]}
+                  {event.organizer.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-sm">
+                <p className="text-muted-foreground">Hosted by</p>
+                <p className="font-medium">
+                  {event.organizer.firstName} {event.organizer.lastName}
                 </p>
               </div>
             </div>
           </div>
-        </main>
-      </section>
 
-      {/* EVENTS with the same category */}
-      <section className="wrapper my-8 flex flex-col gap-8 md:gap-12">
-        <h2 className="h2-bold">Related Events</h2>
+          <Separator />
 
-        <Collection
-          data={relatedEvents?.data}
-          emptyTitle="No events match."
-          emptyStateSubtext="Try a different category or clear your search."
-          collectionType="All_Events"
-          limit={3}
-          page={resolvedSearchParams.page as string}
-          totalPages={relatedEvents?.totalPages}
-        />
-      </section>
-    </>
+          <div>
+            <h2 className="font-display text-2xl font-semibold">About</h2>
+            <p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">
+              {event.description}
+            </p>
+          </div>
+
+          <Separator />
+
+          <section className="my-8 flexflex-col gap-8 md:gap-12">
+            <h2 className="h2-bold">Related Events</h2>
+
+            <Collection
+              data={relatedEvents?.data}
+              emptyTitle="No events match."
+              emptyStateSubtext="Try a different category or clear your search."
+              collectionType="All_Events"
+              limit={3}
+              page={resolvedSearchParams.page as string}
+              totalPages={relatedEvents?.totalPages}
+            />
+          </section>
+          {/* <RelatedEvents current={event} all={events} /> */}
+        </div>
+
+        {/* Side card */}
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+            <div className="mb-4 flex items-baseline gap-1">
+              <span
+                className={`${hasEventFinished ? "line-through text-ring" : ""} font-display text-3xl font-semibold`}
+              >
+                {formatPrice(event.price)}
+              </span>
+
+              {!event.isFree && (
+                <span className="text-xs text-muted-foreground">
+                  per ticket
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start gap-3">
+                <Calendar className="mt-0.5 h-4 w-4 text-accent" />
+                <div>
+                  <p className="font-medium">
+                    {formatDateLong(event.startDateTime)}
+                  </p>
+                  <p className="text-muted-foreground">
+                    <Clock className="mr-1 inline h-3 w-3" />
+                    {formatTime(event.startDateTime)} –{" "}
+                    {formatTime(event.endDateTime)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 text-accent" />
+                <p>{event.location}</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <Users className="mt-0.5 h-4 w-4 text-accent" />
+                <p>
+                  {event.attendeesCount} going ·{" "}
+                  {event.capacity - event.attendeesCount} spots left
+                </p>
+              </div>
+              <CheckoutButton event={event} />
+            </div>
+
+            {isOrganizer && (
+              <>
+                <Separator className="my-5" />
+                <p className="mb-3 text-xs uppercase tracking-wide text-muted-foreground">
+                  Organizer tools
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="flex-1 rounded-none hover:bg-accent-foreground border border-border hover:border-blue-500 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-500 text-sm"
+                  >
+                    <Link href={`/events/${event._id}/update`}>
+                      <Pencil className="mr-1 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex-1 text-destructive rounded-none text-sm hover:bg-destructive/10 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out hover:text-destructive"
+                      >
+                        <Trash2 className="mr-1 h-4 w-4" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently remove{" "}
+                          <span className="font-semibold text-black">
+                            {event.title}
+                          </span>
+                          . This cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="hover:bg-muted-foreground rounded-none cursor-pointer transition-all duration-300 ease-in-out">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          // onClick={handleDelete}
+                          className="bg-destructive text-white rounded-none cursor-pointer hover:bg-red-700 transition-all duration-300 ease-in-out"
+                        >
+                          Delete event
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </>
+            )}
+          </div>
+        </aside>
+      </div>
+    </article>
   );
 };
 
