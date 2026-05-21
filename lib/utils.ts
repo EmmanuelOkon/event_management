@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns/format";
+import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
@@ -107,7 +108,15 @@ export function removeKeysFromQuery({
   );
 }
 
-export const handleError = (error: unknown) => {
+export const handleError = (error: unknown): never => {
   console.error(error);
   throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+};
+
+export const formatDateToDashes = (date: Date): string => {
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+
+  return `${day}-${month}-${year}`;
 };

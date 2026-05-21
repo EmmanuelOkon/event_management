@@ -12,6 +12,8 @@ const CheckoutButton = ({ event }: { event: IEvent }) => {
   const { user } = useUser();
   const userId = user?.publicMetadata.userId as string;
   const hasEventFinished = new Date(event.endDateTime) < new Date();
+  const ticketsAvailable = event.ticketsAvailable ?? 0;
+  const isSoldOut = ticketsAvailable <= 0;
 
   const share = () => {
     navigator.clipboard?.writeText(window.location.href);
@@ -20,14 +22,14 @@ const CheckoutButton = ({ event }: { event: IEvent }) => {
 
   return (
     <div className="flex items-center gap-2 w-full flex-col">
-      {hasEventFinished ? (
+      {hasEventFinished || isSoldOut ? (
         <Button
           // className="rounded-none w-full disabled:cursor-not-allowed"
           className="rounded-none w-full disabled:opacity50 disabled:cursor-not-allowed disabled:pointer-events-auto"
           size="lg"
           disabled
         >
-          Sold Out
+          {hasEventFinished ? "Event Ended" : "Sold Out"}
         </Button>
       ) : (
         <>

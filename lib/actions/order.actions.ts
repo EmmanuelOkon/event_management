@@ -22,6 +22,19 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
   const price = order.isFree ? 0 : Number(order.price) * 100;
 
   try {
+    await connectToDatabase();
+
+    const event = await Event.findById(order.eventId).select(
+      "ticketsAvailable",
+    );
+    if (
+      !event ||
+      typeof event.ticketsAvailable !== "number" ||
+      event.ticketsAvailable <= 0
+    ) {
+      throw new Error("No tickets available for this event");
+    }
+
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -60,9 +73,18 @@ export const createOrder = async (order: CreateOrderParams) => {
       buyer: order.buyerId,
     });
 
+    const updatedEvent = await Event.findOneAndUpdate(
+      { _id: order.eventId, ticketsAvailable: { $gt: 0 } },
+      { $inc: { ticketsAvailable: -1 } },
+    );
+    if (!updatedEvent) {
+      await Order.findByIdAndDelete(newOrder._id);
+      throw new Error("No tickets available for this event");
+    }
+
     return JSON.parse(JSON.stringify(newOrder));
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 };
 
@@ -124,7 +146,7 @@ export async function getOrdersByEvent({
 
     return JSON.parse(JSON.stringify(orders));
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -164,7 +186,7 @@ export async function getOrdersByUser({
       totalPages: Math.ceil(ordersCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -180,6 +202,6 @@ export async function hasUserBoughtTicket({
 
     return !!paidEvent;
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }

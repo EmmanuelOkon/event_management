@@ -10,6 +10,8 @@ export interface IEvent extends Document {
   startDateTime: Date;
   endDateTime: Date;
   price: string;
+  capacity: number;
+  ticketsAvailable: number;
   isFree: boolean;
   url?: string;
   category: { _id: string; name: string };
@@ -26,6 +28,8 @@ const EventSchema = new Schema({
   startDateTime: { type: Date, default: Date.now },
   endDateTime: { type: Date, default: Date.now },
   price: { type: String },
+  capacity: { type: Number, required: true, min: 1 },
+  ticketsAvailable: { type: Number, required: true, min: 0 },
   isFree: { type: Boolean, default: false },
   url: { type: String },
   category: { type: Schema.Types.ObjectId, ref: "Category" },

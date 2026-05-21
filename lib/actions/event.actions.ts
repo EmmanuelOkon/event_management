@@ -21,6 +21,21 @@ const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: "i" } });
 };
 
+const serializeEvent = (event: unknown) => {
+  const serializedEvent = JSON.parse(JSON.stringify(event));
+
+  if (
+    serializedEvent &&
+    typeof serializedEvent.capacity === "number" &&
+    typeof serializedEvent.ticketsAvailable !== "number"
+  ) {
+    serializedEvent.ticketsAvailable = serializedEvent.capacity;
+  }
+
+  return serializedEvent;
+};
+
+const serializeEvents = (events: unknown[]) => events.map(serializeEvent);
 
 // const populateEvent = (query: Query<IEvent, unknown>) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,12 +61,13 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
       ...event,
       category: event.categoryId,
       organizer: userId,
+      ticketsAvailable: event.capacity,
     });
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(newEvent));
+    return serializeEvent(newEvent);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -64,9 +80,9 @@ export async function getEventById(eventId: string) {
 
     if (!event) throw new Error("Event not found");
 
-    return JSON.parse(JSON.stringify(event));
+    return serializeEvent(event);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -80,16 +96,25 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
       throw new Error("Unauthorized or event not found");
     }
 
+    const ticketsSold = Math.max(
+      (eventToUpdate.capacity ?? 0) - (eventToUpdate.ticketsAvailable ?? 0),
+      0,
+    );
+
     const updatedEvent = await Event.findByIdAndUpdate(
       event._id,
-      { ...event, category: event.categoryId },
+      {
+        ...event,
+        category: event.categoryId,
+        ticketsAvailable: Math.max(event.capacity - ticketsSold, 0),
+      },
       { new: true },
     );
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(updatedEvent));
+    return serializeEvent(updatedEvent);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -101,7 +126,7 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
     const deletedEvent = await Event.findByIdAndDelete(eventId);
     if (deletedEvent) revalidatePath(path);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -138,11 +163,11 @@ export async function getAllEvents({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -167,11 +192,11 @@ export async function getEventsByUser({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -199,10 +224,10 @@ export async function getRelatedEventsByCategory({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }

@@ -25,7 +25,7 @@ export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="hover:bg-primary/20 p-3 text-red-400 hover:text-red-700 transition-all cursor-pointer">
+      <AlertDialogTrigger className="hover:bg-red-100 p-3 text-destructive transition-all cursor-pointer">
         <Trash2 className="h-4 w-4" />
       </AlertDialogTrigger>
 
@@ -40,7 +40,9 @@ export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-none hover:bg-primary/40 hover:text-black cursor-pointer ">Cancel</AlertDialogCancel>
+          <AlertDialogCancel className="rounded-none hover:bg-primary/40 hover:text-black cursor-pointer ">
+            Cancel
+          </AlertDialogCancel>
 
           <AlertDialogAction
             className="rounded-none cursor-pointer bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-600"

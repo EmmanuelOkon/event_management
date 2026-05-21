@@ -27,6 +27,7 @@ export type CreateEventParams = {
     endDateTime: Date;
     categoryId: string;
     price: string;
+    capacity: number;
     isFree: boolean;
     url: string;
   };
@@ -45,6 +46,7 @@ export type UpdateEventParams = {
     endDateTime: Date;
     categoryId: string;
     price: string;
+    capacity: number;
     isFree: boolean;
     url: string;
   };
@@ -81,6 +83,8 @@ export type Event = {
   title: string;
   description: string;
   price: string;
+  capacity: number;
+  ticketsAvailable: number;
   isFree: boolean;
   imageUrl: string;
   location: string;

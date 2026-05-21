@@ -8,13 +8,18 @@ const CreateEvent = async () => {
 
   return (
     <>
-      <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
-        <h3 className="wrapper h3-bold text-center sm:text-left">
-          Create Event
-        </h3>
+      <section className="bg-gray-100 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
+        <div className="wrapper mx-auto max-w-7xl px-6">
+          <h1 className="text-4xl font-display font-semibold tracking-tight text-balance ">
+            Host a new Event
+          </h1>
+          <p className="mt-3 text-zinc-600">
+            Tell people what&apos;s happening — and why they should be there.
+          </p>
+        </div>
       </section>
 
-      <div className="wrapper my-8">
+      <div className="wrapper my-8 px-6">
         <EventForm userId={userId} type="Create" />
       </div>
     </>

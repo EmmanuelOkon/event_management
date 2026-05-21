@@ -23,6 +23,7 @@ import {
   createCategory,
   getAllCategories,
 } from "@/lib/actions/category.actions";
+import { PenLine, PlusIcon } from "lucide-react";
 
 type DropdownProps = {
   value?: string;
@@ -53,23 +54,24 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
 
   return (
     <Select onValueChange={onChangeHandler} defaultValue={value}>
-      <SelectTrigger className="select-field">
-        <SelectValue placeholder="Category" />
+      <SelectTrigger className="select-field rounded-none">
+        <SelectValue placeholder="Pick a category for your event" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="border-[#DBDFE6]">
         {categories.length > 0 &&
           categories.map((category) => (
             <SelectItem
               key={category._id.toString()}
               value={category._id.toString()}
-              className="select-item p-regular-14"
+              className="hover:bg-primary-50 cursor-pointer"
             >
               {category.name}
             </SelectItem>
           ))}
 
         <AlertDialog>
-          <AlertDialogTrigger className="p-medium-14 flex w-full rounded-sm py-3 pl-8 text-primary-500 hover:bg-primary-50 focus:text-primary-500">
+          <AlertDialogTrigger className="flex items-center text-sm w-full rounded-sm h-11 pl-8 text-primary-500 hover:bg-popover-foreground/60 cursor-pointer hover:text-white">
+            <PenLine className="mr-2 h-4 w-4" />
             Add new category
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-white">

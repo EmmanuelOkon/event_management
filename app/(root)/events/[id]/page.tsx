@@ -47,6 +47,17 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
   }
   const event = await getEventById(id);
   const hasEventFinished = new Date(event.endDateTime) < new Date();
+  const capacity = event.capacity ?? 0;
+  const ticketsAvailable = event.ticketsAvailable ?? capacity;
+  const attendeesCount = Math.max(capacity - ticketsAvailable, 0);
+  const startDate = new Date(event.startDateTime);
+  const endDate = new Date(event.endDateTime);
+  const isSameEventDay = startDate.toDateString() === endDate.toDateString();
+  const eventTimeRange = isSameEventDay
+    ? `${formatTime(event.startDateTime)} - ${formatTime(event.endDateTime)}`
+    : `${formatTime(event.startDateTime)} - ${formatDateLong(
+        event.endDateTime,
+      )}, ${formatTime(event.endDateTime)}`;
 
   // Get current user session
   // const { userId: clerkId } = auth();
@@ -75,7 +86,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
   console.log("relatedEvents", event);
 
   return (
-    <article className="mx-auto max-w-7xl px-6 py-12">
+    <article className="mx-auto max-w-7xl px-6 py-12 space-y-12 ">
       <MotionDiv
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -90,7 +101,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
       </MotionDiv>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-8 order-2lg:order-1">
+        <div className="space-y-8">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="rounded-sm">
@@ -127,7 +138,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
             </p>
           </div>
 
-          <Separator />
+          <Separator className="lg:hidden" />
 
           <aside className="lg:hidden">
             <div className="rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
@@ -155,8 +166,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                     </p>
                     <p className="text-muted-foreground">
                       <Clock className="mr-1 inline h-3 w-3" />
-                      {formatTime(event.startDateTime)} –{" "}
-                      {formatTime(event.endDateTime)}
+                      {eventTimeRange}
                     </p>
                   </div>
                 </div>
@@ -167,8 +177,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                 <div className="flex items-start gap-3">
                   <Users className="mt-0.5 h-4 w-4 text-accent" />
                   <p>
-                    {event.attendeesCount} going ·{" "}
-                    {event.capacity - event.attendeesCount} spots left
+                    {attendeesCount} going · {ticketsAvailable} spots left
                   </p>
                 </div>
                 <CheckoutButton event={event} />
@@ -184,9 +193,9 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                     <Button
                       asChild
                       variant="outline"
-                      className="flex-1 rounded-none hover:bg-accent-foreground border border-border hover:border-blue-500 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-500 text-sm"
+                      className="flex-1 rounded-none hover:bg-blue-100 border border-border hover:border-blue-600 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-600 text-sm"
                     >
-                      <Link href={`/events/${event._id}/update`}>
+                      <Link href={`/events/${event._id}/edit`}>
                         <Pencil className="mr-1 h-4 w-4" />
                         Edit
                       </Link>
@@ -195,7 +204,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="outline"
-                          className="flex-1 text-destructive rounded-none text-sm hover:bg-destructive/10 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out hover:text-destructive"
+                          className="flex-1 text-destructive hover:text-destructive rounded-none text-sm hover:bg-red-100 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out"
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
                           Delete
@@ -232,23 +241,6 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
               )}
             </div>
           </aside>
-
-          <Separator />
-
-          <section className="my-8 flexflex-col gap-8 md:gap-12">
-            <h2 className="h2-bold">Related Events</h2>
-
-            <Collection
-              data={relatedEvents?.data}
-              emptyTitle="No events match."
-              emptyStateSubtext="Try a different category or clear your search."
-              collectionType="All_Events"
-              limit={3}
-              page={resolvedSearchParams.page as string}
-              totalPages={relatedEvents?.totalPages}
-            />
-          </section>
-          {/* <RelatedEvents current={event} all={events} /> */}
         </div>
 
         {/* Side card */}
@@ -278,8 +270,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                   </p>
                   <p className="text-muted-foreground">
                     <Clock className="mr-1 inline h-3 w-3" />
-                    {formatTime(event.startDateTime)} –{" "}
-                    {formatTime(event.endDateTime)}
+                    {eventTimeRange}
                   </p>
                 </div>
               </div>
@@ -290,8 +281,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
               <div className="flex items-start gap-3">
                 <Users className="mt-0.5 h-4 w-4 text-accent" />
                 <p>
-                  {event.attendeesCount} going ·{" "}
-                  {event.capacity - event.attendeesCount} spots left
+                  {attendeesCount} going · {ticketsAvailable} spots left
                 </p>
               </div>
               <CheckoutButton event={event} />
@@ -307,9 +297,9 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                   <Button
                     asChild
                     variant="outline"
-                    className="flex-1 rounded-none hover:bg-accent-foreground border border-border hover:border-blue-500 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-500 text-sm"
+                    className="flex-1 rounded-none hover:bg-blue-100 border border-border hover:border-blue-600 cursor-pointer transition-all duration-300 ease-in-out hover:text-blue-600 text-sm"
                   >
-                    <Link href={`/events/${event._id}/update`}>
+                    <Link href={`/events/${event._id}/edit`}>
                       <Pencil className="mr-1 h-4 w-4" />
                       Edit
                     </Link>
@@ -318,7 +308,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="outline"
-                        className="flex-1 text-destructive rounded-none text-sm hover:bg-destructive/10 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out hover:text-destructive"
+                        className="flex-1 text-destructive hover:text-destructive rounded-none text-sm hover:bg-red-100 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out"
                       >
                         <Trash2 className="mr-1 h-4 w-4" />
                         Delete
@@ -354,6 +344,22 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
           </div>
         </aside>
       </div>
+
+      <Separator />
+
+      <section className="my-8 flex flex-col gap-8 md:gap-12">
+        <h2 className="h2-bold">Related Events</h2>
+
+        <Collection
+          data={relatedEvents?.data}
+          emptyTitle="No events match."
+          emptyStateSubtext="Try a different category or clear your search."
+          collectionType="All_Events"
+          limit={3}
+          page={resolvedSearchParams.page as string}
+          totalPages={relatedEvents?.totalPages}
+        />
+      </section>
     </article>
   );
 };

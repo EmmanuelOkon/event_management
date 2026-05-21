@@ -47,8 +47,8 @@ const Card = async ({
       {isEventCreator && !hidePrice && (
         <div className="absolute right-4 top-4 flex flex-col gap4 bg-white  backdrop-blur-sm divide-y divide-black border border-black shadow-sm transition-all">
           <Link
-            href={`/events/${event._id}/update`}
-            className="hover:bg-primary/50 p-3 text-gray-500 hover:text-primary transition-all"
+            href={`/events/${event._id}/edit`}
+            className="p-3 text-gray-500 transition-all hover:bg-blue-100 hover:text-blue-600"
           >
             <Edit className="h-4 w-4 " />
           </Link>
