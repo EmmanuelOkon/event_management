@@ -95,7 +95,7 @@ export const eventFormSchema = z
       ctx.addIssue({
         code: "custom",
         message: "End date must be after start date",
-        path: ["endTime"],
+        path: ["endDate"],
       });
     }
   });

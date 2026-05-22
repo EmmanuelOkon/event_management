@@ -1,5 +1,4 @@
-import EventForm from "@/components/shared/EventForm";
-import { getEventById } from "@/lib/actions/event.actions";
+import EventEditContent from "@/components/shared/EventEditContent";
 import { auth } from "@clerk/nextjs/server";
 
 type EditEventProps = {
@@ -11,8 +10,6 @@ const EditEvent = async ({ params }: EditEventProps) => {
   const { sessionClaims } = await auth();
 
   const userId = sessionClaims?.userId as string;
-
-  const event = await getEventById(id);
 
   return (
     <>
@@ -28,14 +25,7 @@ const EditEvent = async ({ params }: EditEventProps) => {
         </div>
       </section>
 
-      <div className="wrapper my-8 px-6 mx-auto max-w-5xl border border-foreground/20">
-        <EventForm
-          type="Update"
-          eventId={event._id}
-          userId={userId}
-          event={event}
-        />
-      </div>
+      <EventEditContent eventId={id} userId={userId} />
     </>
   );
 };

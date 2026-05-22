@@ -23,14 +23,13 @@ import { Textarea } from "../ui/textarea";
 import Dropdown from "./Dropdown";
 import { FileUploader } from "./FileUploader";
 
-import { createEvent, updateEvent } from "@/lib/actions/event.actions";
+import { useCreateEvent, useUpdateEvent } from "@/components/hooks/useEvents";
 import { useProgress } from "@bprogress/react";
 import { useRouter } from "next/navigation";
 
-import { Link, MapPin } from "lucide-react";
-import { notifyError, notifySuccess } from "../shared/Toast";
+import { Link, LoaderCircle, MapPin } from "lucide-react";
+import { notifyError } from "../shared/Toast";
 import { DatePickerField } from "../ui/date-picker-field";
-import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 import { TimePickerField } from "../ui/time-picker-field";
@@ -70,42 +69,73 @@ const combineDateAndTime = (date: Date, time: string) => {
   return dateTime;
 };
 
+const buildEventFormDefaults = (event: EventType) => ({
+  title: event.title,
+  description: event.description,
+  location: event.location,
+  imageUrl: event.imageUrl,
+  url: event.url ?? "",
+  isFree: event.isFree,
+  price: event.price ?? "",
+  capacity: event.capacity?.toString() ?? "",
+  categoryId: String(event.category._id),
+  startDate: new Date(event.startDateTime),
+  startTime: formatTimeForField(new Date(event.startDateTime)),
+  endDate: new Date(event.endDateTime),
+  endTime: formatTimeForField(new Date(event.endDateTime)),
+});
+
 const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [isProcessingSubmit, setIsProcessingSubmit] = useState(false);
   const initialValues =
     event && type === "Update"
-      ? {
-          ...event,
-          capacity: event.capacity?.toString() ?? "",
-          startDate: new Date(event.startDateTime),
-          startTime: formatTimeForField(new Date(event.startDateTime)),
-          endDate: new Date(event.endDateTime),
-          endTime: formatTimeForField(new Date(event.endDateTime)),
-        }
+      ? buildEventFormDefaults(event)
       : eventDefaultValues;
 
   const router = useRouter();
   const { start } = useProgress();
+  const { createNewEvent, isCreatingEvent } = useCreateEvent();
+  const { updateExistingEvent, isUpdatingEvent } = useUpdateEvent();
+  const isBusy = isProcessingSubmit || isCreatingEvent || isUpdatingEvent;
 
   const { startUpload, routeConfig } = useUploadThing("imageUploader");
 
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: initialValues,
+    reValidateMode: "onChange",
   });
 
   const isFree = form.watch("isFree");
+  const triggerDateTimeValidation = () =>
+    form.trigger(["startDate", "startTime", "endDate", "endTime"]);
 
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
+    setIsProcessingSubmit(true);
     let uploadedImageUrl = values.imageUrl;
 
-    if (files.length > 0) {
-      const uploadedImages = await startUpload(files);
+    try {
+      if (files.length > 0) {
+        const uploadedImages = await startUpload(files);
 
-      if (!uploadedImages) {
-        return;
+        if (!uploadedImages) {
+          setIsProcessingSubmit(false);
+          return;
+        }
+        uploadedImageUrl = uploadedImages[0].url;
       }
-      uploadedImageUrl = uploadedImages[0].url;
+    } catch (error) {
+      setIsProcessingSubmit(false);
+      notifyError(
+        error instanceof Error ? error.message : "Error Uploading Image",
+        {
+          position: "top-right",
+          autoClose: 3000,
+          pauseOnHover: false,
+        },
+      );
+      return;
     }
 
     const eventPayload = {
@@ -124,72 +154,76 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
     };
 
     if (type === "Create") {
-      try {
-        const newEvent = await createEvent({
+      createNewEvent(
+        {
           event: eventPayload,
           userId,
           path: "/profile",
-        });
-
-        if (newEvent) {
-          notifySuccess("New Event Created", {
-            position: "top-right",
-            autoClose: 3000,
-            pauseOnHover: false,
-          });
-          form.reset();
-          start();
-          router.push(`/events/${newEvent._id}`);
-        }
-      } catch (error) {
-        console.error(error);
-        notifyError(
-          error instanceof Error ? error.message : "Error Creating Event",
-          {
-            position: "top-right",
-            autoClose: 3000,
-            pauseOnHover: false,
+        },
+        {
+          onSuccess: (newEvent) => {
+            setIsProcessingSubmit(false);
+            if (newEvent) {
+              form.reset();
+              start();
+              router.push(`/events/${newEvent._id}`);
+            }
           },
-        );
-      }
+          onError: (error) => {
+            setIsProcessingSubmit(false);
+            notifyError(
+              error instanceof Error ? error.message : "Error Creating Event",
+              {
+                position: "top-right",
+                autoClose: 3000,
+                pauseOnHover: false,
+              },
+            );
+          },
+        },
+      );
     }
+
     if (type === "Update") {
       if (!eventId) {
+        setIsProcessingSubmit(false);
         start();
         router.back();
         return;
       }
-      try {
-        const updatedEvent = await updateEvent({
+
+      updateExistingEvent(
+        {
           userId,
           event: {
             ...eventPayload,
             _id: eventId,
           },
           path: `/events/${eventId}`,
-        });
-
-        if (updatedEvent) {
-          notifySuccess("Event Updated successfully", {
-            position: "top-right",
-            autoClose: 3000,
-            pauseOnHover: false,
-          });
-          form.reset();
-          start();
-          router.push(`/events/${updatedEvent._id}`);
-        }
-      } catch (error) {
-        console.error(error);
-        notifyError(
-          error instanceof Error ? error.message : "Error Updating Event",
-          {
-            position: "top-right",
-            autoClose: 3000,
-            pauseOnHover: false,
+        },
+        {
+          onSuccess: (updatedEvent) => {
+            setIsProcessingSubmit(false);
+            if (updatedEvent) {
+              form.reset();
+              start();
+              router.push(`/events/${updatedEvent._id}`);
+            }
           },
-        );
-      }
+          onError: (error) => {
+            setIsProcessingSubmit(false);
+            console.log("Update Event Error:", error);
+            notifyError(
+              error instanceof Error ? error.message : "Error Updating Event",
+              {
+                position: "top-right",
+                autoClose: 3000,
+                pauseOnHover: false,
+              },
+            );
+          },
+        },
+      );
     }
   }
 
@@ -317,7 +351,10 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                   <FormControl>
                     <DatePickerField
                       date={field.value}
-                      onDateChange={field.onChange}
+                      onDateChange={(date) => {
+                        field.onChange(date);
+                        void triggerDateTimeValidation();
+                      }}
                       placeholder="Select date"
                       iconPosition="start"
                       className="text-sm"
@@ -338,7 +375,10 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                   <FormControl>
                     <TimePickerField
                       value={field.value}
-                      onTimeChange={field.onChange}
+                      onTimeChange={(time) => {
+                        field.onChange(time);
+                        void triggerDateTimeValidation();
+                      }}
                       placeholder="Select time"
                       iconPosition="start"
                       className="text-sm cursor-pointer"
@@ -363,7 +403,10 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                   <FormControl>
                     <DatePickerField
                       date={field.value}
-                      onDateChange={field.onChange}
+                      onDateChange={(date) => {
+                        field.onChange(date);
+                        void triggerDateTimeValidation();
+                      }}
                       placeholder="Select date"
                       iconPosition="start"
                       className="text-sm"
@@ -384,7 +427,10 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                   <FormControl>
                     <TimePickerField
                       value={field.value}
-                      onTimeChange={field.onChange}
+                      onTimeChange={(time) => {
+                        field.onChange(time);
+                        void triggerDateTimeValidation();
+                      }}
                       placeholder="Select time"
                       iconPosition="start"
                       className="text-sm cursor-pointer"
@@ -416,7 +462,6 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
             </FormLabel>
             <div className="flex items-center justify-between bg-red500">
               <div>
-                {/* <Label className="text-base">Free event</Label> */}
                 <p className="text-[12px] text-muted-foreground">
                   {!isFree
                     ? "Set an amount to charge attendees for this event"
@@ -444,7 +489,6 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                   name="price"
                   render={({ field }) => (
                     <FormItem className="mb-0 w-1/2">
-                      {/* <FormLabel>Ticket price (USD)</FormLabel> */}
                       <FormControl>
                         <Input
                           startContent={<span>$</span>}
@@ -523,14 +567,22 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
         <Button
           type="submit"
           size="lg"
-          disabled={form.formState.isSubmitting}
+          disabled={isBusy}
           className="button col-span-2 w-full rounded-none"
         >
-          {form.formState.isSubmitting
-            ? type === "Create"
-              ? "Creating..."
-              : "Updating..."
-            : `${type} Event`}
+          {isBusy ? (
+            <LoaderCircle size={20} className="animate-spin transition-all" />
+          ) : null}
+          {isProcessingSubmit &&
+          !isCreatingEvent &&
+          !isUpdatingEvent &&
+          files.length > 0
+            ? "Uploading image..."
+            : isBusy
+              ? type === "Create"
+                ? "Creating..."
+                : "Updating..."
+              : `${type} Event`}
         </Button>
       </form>
     </Form>

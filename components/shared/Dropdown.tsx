@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Select,
   SelectContent,
@@ -5,8 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  useCreateCategory,
+  useGetAllCategories,
+} from "@/components/hooks";
 import { ICategory } from "@/lib/database/models/category.model";
-import { startTransition, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,47 +25,54 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "../ui/input";
-import {
-  createCategory,
-  getAllCategories,
-} from "@/lib/actions/category.actions";
-import { PenLine, PlusIcon } from "lucide-react";
+import { PenLine } from "lucide-react";
 
 type DropdownProps = {
   value?: string;
-  onChangeHandler?: () => void;
+  onChangeHandler?: (value: string) => void;
 };
 
 const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
-  const [categories, setCategories] = useState<ICategory[]>([]);
   const [newCategory, setNewCategory] = useState("");
+  const { categories, isLoadingCategories } = useGetAllCategories();
+  const { createNewCategory, isCreatingCategory } = useCreateCategory();
 
   const handleAddCategory = () => {
-    createCategory({
-      categoryName: newCategory.trim(),
-    }).then((category) => {
-      setCategories((prevState) => [...prevState, category]);
-    });
+    const categoryName = newCategory.trim();
+    if (!categoryName) return;
+
+    createNewCategory(
+      { categoryName },
+      {
+        onSuccess: (category) => {
+          setNewCategory("");
+          if (category?._id) {
+            onChangeHandler?.(String(category._id));
+          }
+        },
+      },
+    );
   };
 
-  useEffect(() => {
-    const getCategories = async () => {
-      const categoryList = await getAllCategories();
-
-      categoryList && setCategories(categoryList as ICategory[]);
-    };
-
-    getCategories();
-  }, []);
-
   return (
-    <Select onValueChange={onChangeHandler} defaultValue={value}>
+    <Select
+      onValueChange={onChangeHandler}
+      value={value ?? ""}
+      disabled={isLoadingCategories}
+    >
       <SelectTrigger className="select-field rounded-none">
-        <SelectValue placeholder="Pick a category for your event" />
+        <SelectValue
+          placeholder={
+            isLoadingCategories
+              ? "Loading categories..."
+              : "Pick a category for your event"
+          }
+        />
       </SelectTrigger>
       <SelectContent className="border-[#DBDFE6]">
-        {categories.length > 0 &&
-          categories.map((category) => (
+        {categories &&
+          categories.length > 0 &&
+          (categories as ICategory[]).map((category) => (
             <SelectItem
               key={category._id.toString()}
               value={category._id.toString()}
@@ -82,6 +95,7 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
                   type="text"
                   placeholder="Category name"
                   className="input-field mt-3"
+                  value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                 />
               </AlertDialogDescription>
@@ -89,9 +103,10 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => startTransition(handleAddCategory)}
+                onClick={handleAddCategory}
+                disabled={isCreatingCategory || !newCategory.trim()}
               >
-                Add
+                {isCreatingCategory ? "Adding..." : "Add"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

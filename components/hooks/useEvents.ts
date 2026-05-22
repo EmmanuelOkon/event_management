@@ -62,6 +62,10 @@ export const useUpdateEvent = () => {
       toast.success("Event updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["event", data?._id] });
     },
+
+    onError: (mutationError) => {
+      throw mutationError;
+    },
   });
 
   return {
@@ -125,70 +129,70 @@ export const useGetEventById = (eventId: string) => {
 
 // FETCH ALL EVENTS
 export const useGetAllEvents = (params: GetAllEventsParams) => {
- const {
-   data: eventsData,
-   isLoading: isLoadingAllEvents,
-   isSuccess: isGetAllEventsSuccess,
-   isError: isGetAllEventsError,
-   error: getAllEventsError,
- } = useQuery({
-   queryKey: ["events", params],
-   queryFn: () => getAllEvents(params),
- });
+  const {
+    data: eventsData,
+    isLoading: isLoadingAllEvents,
+    isSuccess: isGetAllEventsSuccess,
+    isError: isGetAllEventsError,
+    error: getAllEventsError,
+  } = useQuery({
+    queryKey: ["events", params],
+    queryFn: () => getAllEvents(params),
+  });
 
- return {
-   eventsData,
-   isLoadingAllEvents,
-   isGetAllEventsSuccess,
-   isGetAllEventsError,
-   getAllEventsError,
- };
+  return {
+    eventsData,
+    isLoadingAllEvents,
+    isGetAllEventsSuccess,
+    isGetAllEventsError,
+    getAllEventsError,
+  };
 };
 
 // FETCH EVENTS BY ORGANIZER
 export const useGetEventsByUser = (params: GetEventsByUserParams) => {
-const {
-  data: userEvents,
-  isLoading: isLoadingUserEvents,
-  isSuccess: isGetUserEventsSuccess,
-  isError: isGetUserEventsError,
-  error: getUserEventsError,
-} = useQuery({
-  queryKey: ["events", "user", params.userId, params.page],
-  queryFn: () => getEventsByUser(params),
-  enabled: !!params.userId,
-});
+  const {
+    data: userEvents,
+    isLoading: isLoadingUserEvents,
+    isSuccess: isGetUserEventsSuccess,
+    isError: isGetUserEventsError,
+    error: getUserEventsError,
+  } = useQuery({
+    queryKey: ["events", "user", params.userId, params.page],
+    queryFn: () => getEventsByUser(params),
+    enabled: !!params.userId,
+  });
 
-return {
-  userEvents,
-  isLoadingUserEvents,
-  isGetUserEventsSuccess,
-  isGetUserEventsError,
-  getUserEventsError,
-};
+  return {
+    userEvents,
+    isLoadingUserEvents,
+    isGetUserEventsSuccess,
+    isGetUserEventsError,
+    getUserEventsError,
+  };
 };
 
 // FETCH RELATED EVENTS
 export const useGetRelatedEvents = (
   params: GetRelatedEventsByCategoryParams,
 ) => {
- const {
-   data: relatedEvents,
-   isLoading: isLoadingRelatedEvents,
-   isSuccess: isGetRelatedEventsSuccess,
-   isError: isGetRelatedEventsError,
-   error: getRelatedEventsError,
- } = useQuery({
-   queryKey: ["events", "related", params.categoryId, params.eventId],
-   queryFn: () => getRelatedEventsByCategory(params),
-   enabled: !!params.categoryId,
- });
+  const {
+    data: relatedEvents,
+    isLoading: isLoadingRelatedEvents,
+    isSuccess: isGetRelatedEventsSuccess,
+    isError: isGetRelatedEventsError,
+    error: getRelatedEventsError,
+  } = useQuery({
+    queryKey: ["events", "related", params.categoryId, params.eventId],
+    queryFn: () => getRelatedEventsByCategory(params),
+    enabled: !!params.categoryId,
+  });
 
- return {
-   relatedEvents,
-   isLoadingRelatedEvents,
-   isGetRelatedEventsSuccess,
-   isGetRelatedEventsError,
-   getRelatedEventsError,
- };
+  return {
+    relatedEvents,
+    isLoadingRelatedEvents,
+    isGetRelatedEventsSuccess,
+    isGetRelatedEventsError,
+    getRelatedEventsError,
+  };
 };

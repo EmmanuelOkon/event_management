@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 
-import { RemoveUrlQueryParams, UrlQueryParams } from "@/types";
+import { IErrorResponse, RemoveUrlQueryParams, UrlQueryParams } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -120,3 +120,24 @@ export const formatDateToDashes = (date: Date): string => {
 
   return `${day}-${month}-${year}`;
 };
+
+export function getErrorMessage(error: unknown): string {
+  const typedError = error as IErrorResponse;
+  const errorObject = typedError?.response?.data?.errors;
+  const errorKeys = errorObject ? Object.keys(errorObject)[0] : null;
+
+  // Get the first error message
+  const firstError =
+    errorKeys && typeof errorObject === "object" && errorObject !== null
+      ? (errorObject as Record<string, any>)[errorKeys][0]
+      : null;
+
+  // If errors exist, show the first one
+  const errorString = errorObject
+    ? firstError || "Unknown error"
+    : typedError?.response?.data?.message?.length > 0
+      ? typedError?.response?.data?.message
+      : "An unexpected error occurred";
+
+  return errorString as string;
+}

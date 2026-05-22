@@ -1,6 +1,6 @@
 "use client";
 
-import { IEvent } from "@/lib/database/models/event.model";
+import type { Event as EventType } from "@/types";
 import { Show, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -8,7 +8,7 @@ import Checkout from "./Checkout";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 
-const CheckoutButton = ({ event }: { event: IEvent }) => {
+const CheckoutButton = ({ event }: { event: EventType }) => {
   const { user } = useUser();
   const userId = user?.publicMetadata.userId as string;
   const hasEventFinished = new Date(event.endDateTime) < new Date();

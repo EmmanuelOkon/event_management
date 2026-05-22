@@ -1,4 +1,4 @@
-import { IEvent } from "@/lib/database/models/event.model";
+import type { Event as EventType } from "@/types";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 
@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-const Checkout = ({ event, userId }: { event: IEvent; userId: string }) => {
+const Checkout = ({ event, userId }: { event: EventType; userId: string }) => {
   useEffect(() => {
     // Check to see if this is a redirect back from Checkout
     const query = new URLSearchParams(window.location.search);
