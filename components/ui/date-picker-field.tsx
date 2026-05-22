@@ -56,7 +56,7 @@ export function DatePickerField({
           type="button"
           id={id}
           className={cn(
-            "flex h-11 w-full items-center rounded-none border border-[#DBDFE6] bg-white text-sm ring-offset-accent outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 md:focus-visible:ring-offset-2 cursor-pointer",
+            "flex h-11 w-full items-center rounded-none border border-[#DBDFE6] bg-white text-sm ring-offset-black outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1 md:focus-visible:ring-offset-2 cursor-pointer",
             iconPosition === "end"
               ? "justify-between pl-5 pr-3"
               : "justify-start pl-3 pr-5",
@@ -82,7 +82,7 @@ export function DatePickerField({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 border-accent/60" align="start">
+      <PopoverContent className="w-auto p-0 border-black/60 rounded-none" align="start">
         <Calendar
           mode="single"
           selected={date}

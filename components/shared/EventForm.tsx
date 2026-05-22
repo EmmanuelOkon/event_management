@@ -96,13 +96,8 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
   const isFree = form.watch("isFree");
 
-  console.log("submit:", form.formState.errors);
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
-    console.log("submit:", values);
-
     let uploadedImageUrl = values.imageUrl;
-
-    console.log("button click", uploadedImageUrl);
 
     if (files.length > 0) {
       const uploadedImages = await startUpload(files);
@@ -110,7 +105,6 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
       if (!uploadedImages) {
         return;
       }
-      console.log("uploadedImages", uploadedImages);
       uploadedImageUrl = uploadedImages[0].url;
     }
 
@@ -210,7 +204,9 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cover image</FormLabel>
+              <FormLabel>
+                Cover image <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <FileUploader
                   onFieldChange={field.onChange}
@@ -405,11 +401,26 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-none border border-border bg-card p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <FormLabel className="space-x-1">
+              Pricing
+              <span className="text-red-500 ml-1">*</span>
+              {isFree ? (
+                <span className="text-[10px] text-muted-foreground">
+                  Free Event
+                </span>
+              ) : (
+                <span className="text-[10px] text-muted-foreground">
+                  Paid Event
+                </span>
+              )}
+            </FormLabel>
+            <div className="flex items-center justify-between bg-red500">
               <div>
-                <Label className="text-base">Free event</Label>
-                <p className="text-sm text-muted-foreground">
-                  Toggle off to charge a ticket price
+                {/* <Label className="text-base">Free event</Label> */}
+                <p className="text-[12px] text-muted-foreground">
+                  {!isFree
+                    ? "Set an amount to charge attendees for this event"
+                    : "Toggle off if this is a paid event"}
                 </p>
               </div>
               <FormField
@@ -424,7 +435,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
               />
             </div>
             {!isFree && (
-              <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between gap-4">
+              <div className="mt-4pt-4border-t border-zinc-100 flex items-center justify-between gap-4">
                 <label className="text-sm font-medium text-zinc-700 whitespace-nowrap">
                   Ticket price (USD)
                 </label>
@@ -436,13 +447,13 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
                       {/* <FormLabel>Ticket price (USD)</FormLabel> */}
                       <FormControl>
                         <Input
+                          startContent={<span>$</span>}
+                          className="pl-3"
                           type="number"
                           min={1}
                           step={1}
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => field.onChange(e.target.value)}
                           placeholder="0.00"
                         />
                       </FormControl>
@@ -455,19 +466,19 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           </div>
 
           <div className="rounded-none border border-border bg-card p-5 space-y-4">
-            <div>
-              <Label className="text-base">
-                Capacity <span className="text-red-500">*</span>
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Maximum number of attendees
-              </p>
-            </div>
             <FormField
               control={form.control}
               name="capacity"
               render={({ field }) => (
                 <FormItem>
+                  <div>
+                    <FormLabel>
+                      Capacity <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <p className="text-[12px] text-muted-foreground">
+                      Maximum number of attendees
+                    </p>
+                  </div>
                   {/* <FormLabel>
                     Capacity <span className="text-red-500">*</span>
                   </FormLabel> */}
@@ -495,7 +506,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           name="url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>External URL</FormLabel>
+              <FormLabel>External URL (Optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="https://evoria.com"

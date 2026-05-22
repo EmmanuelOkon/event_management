@@ -162,7 +162,7 @@ export function TimePickerField({
           id={id}
           disabled={disabled}
           className={cn(
-            "flex h-11 w-full items-center rounded-none border border-[#DBDFE6] bg-white text-sm ring-offset-accent outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 md:focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
+            "flex h-11 w-full items-center rounded-none border border-[#DBDFE6] bg-white text-sm ring-offset-black outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1 md:focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
             iconPosition === "end"
               ? "justify-between pl-5 pr-3"
               : "justify-start pl-3 pr-5",
@@ -189,7 +189,7 @@ export function TimePickerField({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[320px] space-y-4 p-4 border-accent/60!"
+        className="w-[320px] space-y-4 p-4 border-black/60! rounded-none"
         align="start"
       >
         <div className="grid grid-cols-3 gap-3">
@@ -201,15 +201,15 @@ export function TimePickerField({
               value={draftValue.hour || undefined}
               onValueChange={(hour) => updateDraftValue({ hour })}
             >
-              <SelectTrigger className="h-11 rounded-[10px] border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
+              <SelectTrigger className="h-11 rounded-none border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
                 <SelectValue placeholder="HH" />
               </SelectTrigger>
-              <SelectContent className="border-[#DBDFE6]">
+              <SelectContent className="border-[#DBDFE6] rounded-none">
                 {HOURS.map((hour) => (
                   <SelectItem
                     key={hour}
                     value={hour}
-                    className="cursor-pointer"
+                    className="cursor-pointer rounded-none"
                   >
                     {hour}
                   </SelectItem>
@@ -226,10 +226,10 @@ export function TimePickerField({
               value={draftValue.minute || undefined}
               onValueChange={(minute) => updateDraftValue({ minute })}
             >
-              <SelectTrigger className="h-11 rounded-[10px] border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
+              <SelectTrigger className="h-11 rounded-none border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
                 <SelectValue placeholder="MM" />
               </SelectTrigger>
-              <SelectContent className="max-h-72 border-[#DBDFE6]">
+              <SelectContent className="max-h-72 border-[#DBDFE6] rounded-none ">
                 {MINUTES.map((minute) => (
                   <SelectItem
                     key={minute}
@@ -251,7 +251,7 @@ export function TimePickerField({
               value={draftValue.period || undefined}
               onValueChange={(period) => updateDraftValue({ period })}
             >
-              <SelectTrigger className="h-11 rounded-[10px] border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
+              <SelectTrigger className="h-11 rounded-none border-[#DBDFE6] bg-white px-3 text-sm text-dark-slate-grey shadow-none cursor-pointer">
                 <SelectValue placeholder="AM/PM" />
               </SelectTrigger>
               <SelectContent className="border-[#DBDFE6]">
@@ -269,7 +269,7 @@ export function TimePickerField({
           <Button
             type="button"
             variant="ghost"
-            className="h-10 flex-1 rounded-[10px] border border-[#E5E7EB] bg-white text-sm font-semibold text-black/70 hover:border-accent/60 hover:bg-white hover:text-black/90"
+            className="h-10 flex-1 rounded-none border border-[#E5E7EB] bg-white text-sm font-semibold text-black/70 hover:border-black/60 hover:bg-white hover:text-black/90"
             onClick={handleClear}
           >
             Clear
@@ -277,7 +277,7 @@ export function TimePickerField({
           <Button
             type="button"
             // variant="primaryBase"
-            className="h-10 flex-1 rounded-[10px] bg-accent text-sm font-semibold text-white hover:bg-accent/90"
+            className="h-10 flex-1 rounded-none bg-black text-sm font-semibold text-white hover:bg-black/90"
             onClick={handleApply}
             disabled={!isComplete}
           >

@@ -19,7 +19,7 @@ const CreateEvent = async () => {
         </div>
       </section>
 
-      <div className="wrapper my-8 px-6">
+      <div className="wrapper my-8 border border-foreground/20 px-6 mx-auto max-w-5xl">
         <EventForm userId={userId} type="Create" />
       </div>
     </>

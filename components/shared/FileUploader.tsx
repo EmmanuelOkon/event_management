@@ -1,12 +1,12 @@
 "use client";
 
 import { useDropzone } from "@uploadthing/react";
+import { ImagePlus, X } from "lucide-react";
 import { Dispatch, MouseEvent, SetStateAction, useCallback } from "react";
 import {
   generateClientDropzoneAccept,
   generatePermittedFileTypes,
 } from "uploadthing/client";
-import { ImagePlus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { convertFileToUrl } from "@/lib/utils";
@@ -24,10 +24,13 @@ export function FileUploader({
   setFiles,
   routeConfig,
 }: FileUploaderProps) {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(acceptedFiles);
-    onFieldChange(convertFileToUrl(acceptedFiles[0]));
-  }, [onFieldChange, setFiles]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      setFiles(acceptedFiles);
+      onFieldChange(convertFileToUrl(acceptedFiles[0]));
+    },
+    [onFieldChange, setFiles],
+  );
 
   const removeImage = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -50,12 +53,12 @@ export function FileUploader({
   return (
     <div
       {...getRootProps()}
-      className=" bg-dark-3 relative overflow-hidden rounded-lg bg-grey-50 h-full"
+      className=" bg-dark-3 relative overflow-hidden rounded-none bg-grey-50 h-full"
     >
       <input {...getInputProps()} className="cursor-pointer" />
 
       {imageUrl ? (
-        <div className="flex h-full w-full flex-1 justify-center relative border border-border rounded-lg overflow-hidden">
+        <div className="flex h-full w-full flex-1 justify-center relative border border-border rounded-none overflow-hidden">
           <img
             src={imageUrl}
             alt="image"
@@ -66,14 +69,14 @@ export function FileUploader({
             size="icon"
             variant="secondary"
             onClick={removeImage}
-            className="absolute right-3 top-3 h-8 w-8 rounded-full cursor-pointer p-0 hover:text-destructive"
+            className="absolute right-3 top-3 h-8 w-8 rounded-none cursor-pointer p-0 hover:text-destructive"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
       ) : (
-        <div className="flex aspect-[21/9] cursor-pointer flex-col items-center justify-center border border-dashed bg-card text-center transition-all duration-300 hover:border-accent/50 rounded-lg">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+        <div className="flex aspect-[21/9] cursor-pointer flex-col items-center justify-center border-2 border-dashed bg-card text-center transition-all duration-300 hover:border-black/50 rounded-none">
+          <div className="flex h-12 w-12 items-center justify-center rounded-none bg-muted">
             <ImagePlus className="h-5 w-5 text-muted-foreground" />
           </div>
 

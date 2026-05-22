@@ -91,7 +91,7 @@ const EventDetails = async ({ params, searchParams }: EventDetailsProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="overflow-hidden rounded-lg border border-border"
+        className="overflow-hidden rounded-none border border-border"
       >
         <img
           src={event.imageUrl}

@@ -28,7 +28,7 @@ const EditEvent = async ({ params }: EditEventProps) => {
         </div>
       </section>
 
-      <div className="wrapper my-8">
+      <div className="wrapper my-8 px-6 mx-auto max-w-5xl border border-foreground/20">
         <EventForm
           type="Update"
           eventId={event._id}

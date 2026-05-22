@@ -70,7 +70,7 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
           ))}
 
         <AlertDialog>
-          <AlertDialogTrigger className="flex items-center text-sm w-full rounded-sm h-11 pl-8 text-primary-500 hover:bg-popover-foreground/60 cursor-pointer hover:text-white">
+          <AlertDialogTrigger className="flex items-center text-sm w-full rounded-none h-11 pl-8 text-primary-500 hover:bg-popover-foreground/60 cursor-pointer hover:text-white">
             <PenLine className="mr-2 h-4 w-4" />
             Add new category
           </AlertDialogTrigger>
