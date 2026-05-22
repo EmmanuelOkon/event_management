@@ -1,21 +1,19 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   createEvent,
-  updateEvent,
   deleteEvent,
-  getEventById,
   getAllEvents,
+  getEventById,
   getEventsByUser,
   getRelatedEventsByCategory,
+  updateEvent,
 } from "@/lib/actions/event.actions";
+import { getErrorMessage } from "@/lib/utils";
 import {
-  CreateEventParams,
-  UpdateEventParams,
-  DeleteEventParams,
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
 } from "@/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // CREATE EVENT
@@ -61,10 +59,6 @@ export const useUpdateEvent = () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["event", data?._id] });
-    },
-
-    onError: (mutationError) => {
-      throw mutationError;
     },
   });
 

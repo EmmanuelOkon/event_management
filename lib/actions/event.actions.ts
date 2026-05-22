@@ -92,8 +92,16 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
     await connectToDatabase();
 
     const eventToUpdate = await Event.findById(event._id);
-    if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
-      throw new Error("Unauthorized or event not found");
+    // if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
+    //   throw new Error("Unauthorized or event not found");
+    // }
+
+    if (!eventToUpdate) {
+      throw new Error("Event not found");
+    }
+
+    if (eventToUpdate.organizer.toHexString() !== userId) {
+      throw new Error("Unauthorized: You are not the organizer of this event!");
     }
 
     const ticketsSold = Math.max(

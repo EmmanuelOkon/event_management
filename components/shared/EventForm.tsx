@@ -33,6 +33,8 @@ import { DatePickerField } from "../ui/date-picker-field";
 import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 import { TimePickerField } from "../ui/time-picker-field";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils";
 
 type EventFormProps = {
   userId: string;
@@ -212,7 +214,7 @@ const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
           },
           onError: (error) => {
             setIsProcessingSubmit(false);
-            console.log("Update Event Error:", error);
+            router.push(`/events/${eventId}`);
             notifyError(
               error instanceof Error ? error.message : "Error Updating Event",
               {

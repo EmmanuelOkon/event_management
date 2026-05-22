@@ -74,7 +74,6 @@ export const formatDateLong = (iso: string) =>
 export const formatRelative = (iso: string) =>
   formatDistanceToNow(new Date(iso), { addSuffix: true });
 
-
 export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   const currentUrl = qs.parse(params);
 
@@ -108,9 +107,23 @@ export function removeKeysFromQuery({
   );
 }
 
+// export const handleError = (error: unknown): never => {
+//   console.error(error);
+//   throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+// };
+
 export const handleError = (error: unknown): never => {
   console.error(error);
-  throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+
+  if (error instanceof Error) {
+    throw error;
+  }
+
+  if (typeof error === "string") {
+    throw new Error(error);
+  }
+
+  throw new Error("An unexpected error occurred");
 };
 
 export const formatDateToDashes = (date: Date): string => {
@@ -122,22 +135,30 @@ export const formatDateToDashes = (date: Date): string => {
 };
 
 export function getErrorMessage(error: unknown): string {
+  // React Query + Server Action errors
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  // Axios errors
   const typedError = error as IErrorResponse;
+
   const errorObject = typedError?.response?.data?.errors;
-  const errorKeys = errorObject ? Object.keys(errorObject)[0] : null;
+  // const errorKeys = errorObject ? Object.keys(errorObject)[0] : null;
 
-  // Get the first error message
-  const firstError =
-    errorKeys && typeof errorObject === "object" && errorObject !== null
-      ? (errorObject as Record<string, any>)[errorKeys][0]
-      : null;
+  const firstError = errorObject
+    ? Object.values(errorObject).find(
+        (value): value is string[] => Array.isArray(value) && value.length > 0,
+      )?.[0]
+    : null;
 
-  // If errors exist, show the first one
-  const errorString = errorObject
-    ? firstError || "Unknown error"
-    : typedError?.response?.data?.message?.length > 0
-      ? typedError?.response?.data?.message
-      : "An unexpected error occurred";
+  if (firstError) {
+    return firstError;
+  }
 
-  return errorString as string;
+  if (typedError?.response?.data?.message) {
+    return typedError.response.data.message;
+  }
+
+  return "An unexpected error occurred";
 }

@@ -24,15 +24,27 @@ const ProfilePage = async ({ searchParams }: SearchParamProps) => {
     <>
       {/* My Tickets */}
       <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
-        <div className="wrapper flex items-center justify-center sm:justify-between">
-          <h3 className="h3-bold text-center sm:text-left">My Tickets</h3>
-          <Button asChild size="lg" className="button hidden sm:flex">
+        <div className="wrapper flex items-center justify-center sm:justify-between mx-auto max-w-7xl px-6">
+          {/* <h3 className="h3-bold text-center sm:text-left">My Tickets</h3> */}
+          <div>
+            <h1 className="text-4xl font-display font-semibold tracking-tight text-balance ">
+              My Tickets
+            </h1>
+            <p className="mt-3 text-zinc-600">
+              View and manage the events you&apos;ve purchased tickets for.
+            </p>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="button hidden sm:flex rounded-none "
+          >
             <Link href="/#events">Explore More Events</Link>
           </Button>
         </div>
       </section>
 
-      <section className="wrapper my-8">
+      <section className="wrapper my-8 mx-auto max-w-7xl px-6">
         <Collection
           data={orderedEvents}
           emptyTitle="No event tickets purchased yet"
@@ -48,8 +60,15 @@ const ProfilePage = async ({ searchParams }: SearchParamProps) => {
       {/* Events Organized */}
       <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
         <div className="wrapper flex items-center justify-center sm:justify-between">
-          <h3 className="h3-bold text-center sm:text-left">Events Organized</h3>
-          <Button asChild size="lg" className="button hidden sm:flex">
+          <div>
+            <h1 className="text-4xl font-display font-semibold tracking-tight text-balance ">
+              Events Organized
+            </h1>
+            <p className="mt-3 text-zinc-600 max-w-xl">
+              View and manage the events you&apos;ve organized. See who&apos;s attending, edit event details, and keep the good times rolling!
+            </p>
+          </div>
+          <Button asChild size="lg" className="button hidden sm:flex rounded-none">
             <Link href="/events/create">Create New Event</Link>
           </Button>
         </div>
