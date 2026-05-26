@@ -13,7 +13,7 @@ interface HeroProps {
 
 export default function Hero({ eventCount }: HeroProps) {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-white">
+    <section className="relative overflow-hidden border-b border-border bg-white lg:px-10">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -21,7 +21,7 @@ export default function Hero({ eventCount }: HeroProps) {
           transition={{ duration: 0.6 }}
           className="flex flex-col justify-center"
         >
-          <p className="text-sm font-medium mb2 uppercase tracking-normal ">
+          <p className="text-sm font-medium uppercase tracking-normal ">
             Volume No. 026
           </p>
           {/* <div className="inline-flex w-fit items-center gap-2 rounded-none border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -73,15 +73,14 @@ export default function Hero({ eventCount }: HeroProps) {
           // className="flex flex-center"
           className="relative"
         >
-          <div className="relative overflow-hidden rounded-2xl border border-border shadow-2xl">
+          <div className="relative overflow-hidden rounded-2xl border border-border shadow-xl">
             <Image
               src="/assets/images/hero.jpg" // Using your existing Next.js image path
               alt="Crowd at an event"
               width={1600}
               height={1200}
               priority
-              className="max-h[70vh] h-full object-cover objectcontain objectcenter 2xl:max-h[50vh] rounded-2xl"
-              // className="h-full w-full object-cover"
+              className="max-h[70vh] h-full object-cover 2xl:max-h[50vh] rounded-2xl"
             />
           </div>
           <div className="absolute bottom-4 -left-8 hidden rounded-xl border border-border bg-card px-4 py-3 shadow-sm sm:block">

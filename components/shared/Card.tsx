@@ -3,7 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import { MotionDiv } from "./MotionWrapper";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Ticket, Users } from "lucide-react";
+
 
 type CardProps = {
   event: EventType;
@@ -22,6 +23,9 @@ const Card = async ({
   const userId = sessionClaims?.userId as string;
 
   const isEventCreator = userId === event.organizer._id.toString();
+  const capacity = event.capacity ?? 0;
+  const ticketsAvailable = event.ticketsAvailable ?? capacity;
+  const attendeesCount = Math.max(capacity - ticketsAvailable, 0);
 
   return (
     <MotionDiv
@@ -77,8 +81,10 @@ const Card = async ({
           </p>
 
           <div className="flex-between w-full mt-4 border-t border-gray-100 pt-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-              By {event.organizer.firstName} {event.organizer.lastName}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1">
+              <Users className="h-3.5 w-3.5" />
+              {attendeesCount} going · <Ticket className="h-3.5 w-3.5" />{" "}
+              {ticketsAvailable} available
             </span>
 
             {hasOrderLink ? (

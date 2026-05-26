@@ -117,7 +117,7 @@ export type CheckoutOrderParams = {
 };
 
 export type GetTicketsByUserParams = {
-  eventTitle: string;
+  // eventTitle: string;
   eventId: string;
   buyerId: string;
 };

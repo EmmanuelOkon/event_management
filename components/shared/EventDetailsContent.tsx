@@ -24,7 +24,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Calendar, Clock, MapPin, Pencil, Trash2, Users } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Pencil,
+  Ticket,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Event as EventType } from "@/types";
@@ -33,6 +42,7 @@ type EventDetailsContentProps = {
   eventId: string;
   userId?: string;
   page?: string;
+  hasPurchasedTicket?: boolean;
 };
 
 type OrganizerSidebarProps = {
@@ -42,6 +52,7 @@ type OrganizerSidebarProps = {
   attendeesCount: number;
   ticketsAvailable: number;
   isOrganizer: boolean;
+  hasPurchasedTicket: boolean;
 };
 
 const OrganizerSidebar = ({
@@ -51,13 +62,16 @@ const OrganizerSidebar = ({
   attendeesCount,
   ticketsAvailable,
   isOrganizer,
+  hasPurchasedTicket,
 }: OrganizerSidebarProps) => (
   <div className="rounded-none border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
     <div className="mb-4 flex items-baseline gap-1">
       <span
         className={`${hasEventFinished ? "line-through text-ring" : ""} font-display text-3xl font-semibold`}
       >
+        {/* Free events return an empty price string */}
         {event?.price ? "" : "Free"}{" "}
+        {/* Event price with value */}
         {event.price ? formatPrice(event.price) : ""}
       </span>
 
@@ -70,7 +84,9 @@ const OrganizerSidebar = ({
       <div className="flex items-start gap-3">
         <Calendar className="mt-0.5 h-4 w-4 text-accent" />
         <div>
-          <p className="font-medium">{formatDateLong(String(event.startDateTime))}</p>
+          <p className="font-medium">
+            {formatDateLong(String(event.startDateTime))}
+          </p>
           <p className="text-muted-foreground">
             <Clock className="mr-1 inline h-3 w-3" />
             {eventTimeRange}
@@ -87,7 +103,31 @@ const OrganizerSidebar = ({
           {attendeesCount} going · {ticketsAvailable} spots left
         </p>
       </div>
-      <CheckoutButton event={event} />
+      {hasPurchasedTicket && !isOrganizer ? (
+        <div className="space-y-3 border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
+            <div>
+              <p className="font-medium">Ticket secured</p>
+              <p className="text-sm text-emerald-800/80">
+                You already have access to this event.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="w-full rounded-none bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            <Link href="/profile">
+              <Ticket className="mr-2 h-4 w-4" />
+              View My Tickets
+            </Link>
+          </Button>
+        </div>
+      ) : (
+        <CheckoutButton event={event} />
+      )}
     </div>
 
     {isOrganizer && (
@@ -122,7 +162,9 @@ const OrganizerSidebar = ({
                 <AlertDialogTitle>Delete this event?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently remove{" "}
-                  <span className="font-semibold text-black">{event.title}</span>
+                  <span className="font-semibold text-black">
+                    {event.title}
+                  </span>
                   . This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -146,6 +188,7 @@ const EventDetailsContent = ({
   eventId,
   userId,
   page,
+  hasPurchasedTicket = false,
 }: EventDetailsContentProps) => {
   const { event, isLoadingEvent, isGetEventError, getEventError } =
     useGetEventById(eventId);
@@ -202,10 +245,11 @@ const EventDetailsContent = ({
     attendeesCount,
     ticketsAvailable,
     isOrganizer,
+    hasPurchasedTicket,
   };
 
   return (
-    <article className="mx-auto max-w-7xl px-6 py-12 space-y-12 ">
+    <article className="mx-auto max-w-6xl px-6 py-12 space-y-12 ">
       <MotionDiv
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -223,12 +267,12 @@ const EventDetailsContent = ({
         <div className="space-y-8">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="rounded-sm">
+              <Badge variant="secondary" className="rounded-none border border-border bg-transparent uppercase ">
                 {event.category.name}
               </Badge>
             </div>
 
-            <h1 className="font-display text-5xl font-semibold tracking-tight text-balance">
+            <h1 className="font-display text-3xl md:text-5xl font-semibold tracking-tight text-balance">
               {event.title}
             </h1>
             <div className="flex items-center gap-3 pt-2">
@@ -255,6 +299,16 @@ const EventDetailsContent = ({
             <p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">
               {event.description}
             </p>
+            {event.url && (
+              <a
+                href={event.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent text-sm mt-3 inline-flex items-center gap-1 font-serif transition-all duration-300 ease-in-out underline underline-offset-4 decoration-accent/20 hover:decoration-accent"
+              >
+                Official Resource
+              </a>
+            )}
           </div>
 
           <Separator className="lg:hidden" />
@@ -264,7 +318,7 @@ const EventDetailsContent = ({
           </aside>
         </div>
 
-        <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
+        <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start lg:shadow-lg">
           <OrganizerSidebar {...sidebarProps} />
         </aside>
       </div>

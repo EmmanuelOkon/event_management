@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { connectToDatabase } from "@/lib/database";
 import Category from "@/lib/database/models/category.model";
 import Event from "@/lib/database/models/event.model";
+import Order from "@/lib/database/models/order.model";
 import User from "@/lib/database/models/user.model";
 import { handleError } from "@/lib/utils";
 
@@ -79,6 +80,15 @@ export async function getEventById(eventId: string) {
     const event = await populateEvent(Event.findById(eventId));
 
     if (!event) throw new Error("Event not found");
+
+    const ordersCount = await Order.countDocuments({ event: event._id });
+    const capacity = event.capacity ?? 0;
+    const liveTicketsAvailable = Math.max(capacity - ordersCount, 0);
+
+    if (event.ticketsAvailable !== liveTicketsAvailable) {
+      event.ticketsAvailable = liveTicketsAvailable;
+      await event.save();
+    }
 
     return serializeEvent(event);
   } catch (error) {

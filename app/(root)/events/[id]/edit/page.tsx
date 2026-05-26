@@ -13,7 +13,7 @@ const EditEvent = async ({ params }: EditEventProps) => {
 
   return (
     <>
-      <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
+      <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10 max-w-6xl mx-auto">
         <div className="wrapper mx-auto max-w-7xl px-6">
           <h1 className="text-4xl font-display font-semibold tracking-tight text-balance  ">
             Refine your Event details

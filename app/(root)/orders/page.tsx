@@ -14,24 +14,36 @@ const Orders = async ({ searchParams }: SearchParamProps) => {
   return (
     <>
       <section className=" bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
-        <h3 className="wrapper h3-bold text-center sm:text-left ">Orders</h3>
+        <div className="wrapper mx-auto max-w-6xl px-6">
+          <h1 className="text-4xl font-display font-semibold tracking-tight text-balance ">
+            Orders
+          </h1>
+          <p className="mt-3 text-zinc-600 max-w-xl">
+            View and manage ticket orders for your event. Search by buyer name,
+            to quickly find specific orders and keep track of your attendees.
+          </p>
+        </div>
       </section>
 
-      <section className="wrapper mt-8">
+      <section className="wrapper mt-8 mx-auto max-w-6xl px-6">
         <Search placeholder="Search buyer name..." />
       </section>
 
-      <section className="wrapper overflow-x-auto">
+      <section className="wrapper overflow-x-auto my-2 mx-auto max-w-6xl px-6">
         <table className="w-full border-collapse border-t">
           <thead>
             <tr className="p-medium-14 border-b text-grey-500">
-              <th className="min-w-[250px] py-3 text-left">Order ID</th>
-              <th className="min-w-[200px] flex-1 py-3 pr-4 text-left">
+              <th className="min-w-[250px] py-3 text-left font-sans font-bold ">
+                Order ID
+              </th>
+              <th className="min-w-[200px] flex-1 py-3 pr-4 text-left font-sans font-bold">
                 Event Title
               </th>
-              <th className="min-w-[150px] py-3 text-left">Buyer</th>
-              <th className="min-w-[100px] py-3 text-left">Created</th>
-              <th className="min-w-[100px] py-3 text-right">Amount</th>
+              <th className="min-w-[150px] py-3 text-left font-sans font-bold">
+                Buyer
+              </th>
+              <th className="min-w-[100px] py-3 text-left font-sans font-bold">Created</th>
+              <th className="min-w-[100px] py-3 text-right font-sans font-bold">Amount</th>
             </tr>
           </thead>
           <tbody>

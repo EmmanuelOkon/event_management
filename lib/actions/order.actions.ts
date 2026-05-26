@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import {
   CheckoutOrderParams,
@@ -81,6 +82,10 @@ export const createOrder = async (order: CreateOrderParams) => {
       await Order.findByIdAndDelete(newOrder._id);
       throw new Error("No tickets available for this event");
     }
+
+    revalidatePath("/");
+    revalidatePath("/profile");
+    revalidatePath(`/events/${order.eventId}`);
 
     return JSON.parse(JSON.stringify(newOrder));
   } catch (error) {
@@ -191,14 +196,16 @@ export async function getOrdersByUser({
 }
 
 export async function hasUserBoughtTicket({
-  eventTitle,
   buyerId,
   eventId,
 }: GetTicketsByUserParams) {
   try {
     await connectToDatabase();
 
-    const paidEvent = await Order.findOne({ eventTitle, buyerId, eventId });
+    const paidEvent = await Order.findOne({
+      event: eventId,
+      buyer: buyerId,
+    });
 
     return !!paidEvent;
   } catch (error) {
