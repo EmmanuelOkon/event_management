@@ -6,14 +6,17 @@ import {
 } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Separator } from "../ui/separator";
 import NavItems from "./NavItems";
 import { X } from "lucide-react";
 
 const MobileNav = () => {
+  const pathname = usePathname();
+
   return (
     <nav className="md:hidden">
-      <Sheet>
+      <Sheet key={pathname}>
         <SheetTrigger className="align-middle">
           <Image
             src="/assets/icons/menu.svg"
