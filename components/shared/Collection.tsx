@@ -24,26 +24,6 @@ type CollectionItemProps = {
   index: number;
 };
 
-const CollectionItem = ({
-  event,
-  hasOrderLink,
-  hidePrice,
-  index,
-}: CollectionItemProps) => {
-  const { event: liveEvent } = useGetEventById(event._id.toString());
-
-  return (
-    <li className="flex justify-center">
-      <Card
-        event={liveEvent ?? event}
-        hasOrderLink={hasOrderLink}
-        hidePrice={hidePrice}
-        index={index}
-      />
-    </li>
-  );
-};
-
 const Collection = ({
   data,
   emptyTitle,
