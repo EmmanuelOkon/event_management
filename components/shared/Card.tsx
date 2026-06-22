@@ -54,16 +54,14 @@ const Card = ({ event, hasOrderLink, hidePrice, index = 0 }: CardProps) => {
             <Edit className="h-4 w-4 " />
           </Link>
 
-          <DeleteConfirmation eventId={event._id} />
+          <DeleteConfirmation eventId={event._id} eventName={event.title} />
         </div>
       )}
 
       <div className="flex flex-col gap-3 p-4">
         {!hidePrice && (
           <div className="flex justify-between items-center mb-2">
-            <span className="badge-editorial">
-              {event.category.name}
-            </span>
+            <span className="badge-editorial">{event.category.name}</span>
           </div>
         )}
 
@@ -75,7 +73,8 @@ const Card = ({ event, hasOrderLink, hidePrice, index = 0 }: CardProps) => {
 
         <div className="flex flex-col gap-2 mt-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500">
-            {event.location} &bull; {event.isFree ? "Complimentary" : `$${event.price}`}
+            {event.location} &bull;{" "}
+            {event.isFree ? "Complimentary" : `$${event.price}`}
           </p>
 
           <div className="flex-between w-full mt-4 border-t border-gray-100 pt-4">

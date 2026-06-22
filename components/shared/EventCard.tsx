@@ -52,7 +52,7 @@ const EventCard = ({
             <Edit className="h-4 w-4 " />
           </Link>
 
-          <DeleteConfirmation eventId={event._id} />
+          <DeleteConfirmation eventId={event._id} eventName={event.title} />
         </div>
       )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import CheckoutButton from "@/components/shared/CheckoutButton";
+import { DeleteConfirmation } from "@/components/shared/DeleteConfirmation";
 import EventCollection from "@/components/shared/EventCollection";
 import EventDetailsSkeleton from "@/components/shared/EventDetailsSkeleton";
 import { MotionDiv } from "@/components/shared/MotionWrapper";
@@ -14,24 +15,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Calendar,
   CheckCircle2,
   Clock,
   MapPin,
   Pencil,
   Ticket,
-  Trash2,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -70,8 +59,7 @@ const OrganizerSidebar = ({
         className={`${hasEventFinished ? "line-through text-ring" : ""} font-display text-3xl font-semibold`}
       >
         {/* Free events return an empty price string */}
-        {event?.price ? "" : "Free"}{" "}
-        {/* Event price with value */}
+        {event?.price ? "" : "Free"} {/* Event price with value */}
         {event.price ? formatPrice(event.price) : ""}
       </span>
 
@@ -119,7 +107,7 @@ const OrganizerSidebar = ({
             size="lg"
             className="w-full rounded-none bg-emerald-600 text-white hover:bg-emerald-700"
           >
-            <Link href="/profile">
+            <Link href="/profile?tab=tickets">
               <Ticket className="mr-2 h-4 w-4" />
               View My Tickets
             </Link>
@@ -147,37 +135,18 @@ const OrganizerSidebar = ({
               Edit
             </Link>
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <DeleteConfirmation
+            eventId={event._id}
+            eventName={event.title}
+            trigger={
               <Button
                 variant="outline"
                 className="flex-1 text-destructive hover:text-destructive rounded-none text-sm hover:bg-red-100 border border-border hover:border-destructive cursor-pointer transition-all duration-300 ease-in-out"
               >
-                <Trash2 className="mr-1 h-4 w-4" />
                 Delete
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete this event?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently remove{" "}
-                  <span className="font-semibold text-black">
-                    {event.title}
-                  </span>
-                  . This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="hover:bg-muted-foreground rounded-none cursor-pointer transition-all duration-300 ease-in-out">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction className="bg-destructive text-white rounded-none cursor-pointer hover:bg-red-700 transition-all duration-300 ease-in-out">
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            }
+          />
         </div>
       </>
     )}

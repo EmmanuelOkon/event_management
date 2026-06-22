@@ -5,7 +5,11 @@ import { headerLinks } from "@/constants";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NavItems = () => {
+type NavItemsProps = {
+  linkWrapper?: (link: React.ReactNode) => React.ReactNode;
+};
+
+const NavItems = ({ linkWrapper }: NavItemsProps) => {
   const pathname = usePathname();
 
   return (
@@ -20,7 +24,11 @@ const NavItems = () => {
               isActive && "border-b border-accent text-accent font-bold "
             } flex-center text-[0.75rem] whitespace-nowrap uppercase font-semibold hover:text-accent transition-colors duration-200`}
           >
-            <Link href={link.route}>{link.label}</Link>
+            {linkWrapper ? (
+              linkWrapper(<Link href={link.route}>{link.label}</Link>)
+            ) : (
+              <Link href={link.route}>{link.label}</Link>
+            )}
           </li>
         );
       })}

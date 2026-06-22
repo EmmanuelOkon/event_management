@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 
@@ -18,14 +19,28 @@ import { deleteEvent } from "@/lib/actions/event.actions";
 import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 
-export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
+type DeleteConfirmationProps = {
+  eventId: string;
+  eventName: string;
+  trigger?: ReactNode;
+};
+
+export const DeleteConfirmation = ({
+  eventId,
+  eventName,
+  trigger,
+}: DeleteConfirmationProps) => {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   return (
     <Dialog>
-      <DialogTrigger className="hover:bg-red-100 p-3 text-destructive transition-all cursor-pointer">
-        <Trash2 className="h-4 w-4" />
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <button className="hover:bg-red-100 p-3 text-destructive transition-all cursor-pointer">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="bg-white rounded-none ">
@@ -38,8 +53,8 @@ export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
           </DialogTitle>
           <DialogDescription className="p-regular-16 text-grey-600">
             Are you sure you want to delete{" "}
-            <span className="font-semibold text-black">name</span>? This action cannot be
-            undone.
+            <span className="font-semibold text-black">{eventName}</span>? This
+            action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 
