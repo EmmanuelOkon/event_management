@@ -1,15 +1,12 @@
 "use client";
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  cn,
+  formUrlQuery,
+  removeKeysFromQuery,
+} from "@/lib/utils";
 import { getAllCategories } from "@/lib/actions/category.actions";
 import { ICategory } from "@/lib/database/models/category.model";
-import { formUrlQuery, removeKeysFromQuery } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -17,6 +14,7 @@ const CategoryFilter = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const selectedCategory = searchParams.get("category") ?? "All";
 
   useEffect(() => {
     const getCategories = async () => {
@@ -44,30 +42,35 @@ const CategoryFilter = () => {
       });
     }
 
+    // start();
     router.push(newUrl, { scroll: false });
   };
 
   return (
-    <Select onValueChange={(value: string) => onSelectCategory(value)}>
-      <SelectTrigger className="select-field">
-        <SelectValue placeholder="Category" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="All" className="select-item p-regular-14">
-          All
-        </SelectItem>
+    <div className="flex w-full flex-wrap items-center gap-3">
+      {["All", ...categories.map((category) => category.name)].map(
+        (categoryName) => {
+          const isActive = selectedCategory === categoryName;
 
-        {categories.map((category) => (
-          <SelectItem
-            value={category.name}
-            key={category._id.toString()}
-            className="select-item p-regular-14"
-          >
-            {category.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+          return (
+            <button
+              key={categoryName}
+              type="button"
+              onClick={() => onSelectCategory(categoryName)}
+              className={cn(
+                "rounded-none border px-5 py-2 text-sm transition-colors cursor-pointer",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                isActive
+                  ? "border-black bg-black text-white hover:bg-primary/90"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:text-white hover:bg-primary/50",
+              )}
+            >
+              {categoryName}
+            </button>
+          );
+        },
+      )}
+    </div>
   );
 };
 

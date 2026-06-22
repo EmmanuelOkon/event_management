@@ -3,24 +3,43 @@
 import { revalidatePath } from "next/cache";
 
 import { connectToDatabase } from "@/lib/database";
-import Event from "@/lib/database/models/event.model";
-import User from "@/lib/database/models/user.model";
 import Category from "@/lib/database/models/category.model";
+import Event from "@/lib/database/models/event.model";
+import Order from "@/lib/database/models/order.model";
+import User from "@/lib/database/models/user.model";
 import { handleError } from "@/lib/utils";
 
 import {
   CreateEventParams,
-  UpdateEventParams,
   DeleteEventParams,
   GetAllEventsParams,
   GetEventsByUserParams,
   GetRelatedEventsByCategoryParams,
+  UpdateEventParams,
 } from "@/types";
 
 const getCategoryByName = async (name: string) => {
   return Category.findOne({ name: { $regex: name, $options: "i" } });
 };
 
+const serializeEvent = (event: unknown) => {
+  const serializedEvent = JSON.parse(JSON.stringify(event));
+
+  if (
+    serializedEvent &&
+    typeof serializedEvent.capacity === "number" &&
+    typeof serializedEvent.ticketsAvailable !== "number"
+  ) {
+    serializedEvent.ticketsAvailable = serializedEvent.capacity;
+  }
+
+  return serializedEvent;
+};
+
+const serializeEvents = (events: unknown[]) => events.map(serializeEvent);
+
+// const populateEvent = (query: Query<IEvent, unknown>) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const populateEvent = (query: any) => {
   return query
     .populate({
@@ -43,12 +62,13 @@ export async function createEvent({ userId, event, path }: CreateEventParams) {
       ...event,
       category: event.categoryId,
       organizer: userId,
+      ticketsAvailable: event.capacity,
     });
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(newEvent));
+    return serializeEvent(newEvent);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -61,9 +81,18 @@ export async function getEventById(eventId: string) {
 
     if (!event) throw new Error("Event not found");
 
-    return JSON.parse(JSON.stringify(event));
+    const ordersCount = await Order.countDocuments({ event: event._id });
+    const capacity = event.capacity ?? 0;
+    const liveTicketsAvailable = Math.max(capacity - ordersCount, 0);
+
+    if (event.ticketsAvailable !== liveTicketsAvailable) {
+      event.ticketsAvailable = liveTicketsAvailable;
+      await event.save();
+    }
+
+    return serializeEvent(event);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -73,20 +102,37 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
     await connectToDatabase();
 
     const eventToUpdate = await Event.findById(event._id);
-    if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
-      throw new Error("Unauthorized or event not found");
+    // if (!eventToUpdate || eventToUpdate.organizer.toHexString() !== userId) {
+    //   throw new Error("Unauthorized or event not found");
+    // }
+
+    if (!eventToUpdate) {
+      throw new Error("Event not found");
     }
+
+    if (eventToUpdate.organizer.toHexString() !== userId) {
+      throw new Error("Unauthorized: You are not the organizer of this event!");
+    }
+
+    const ticketsSold = Math.max(
+      (eventToUpdate.capacity ?? 0) - (eventToUpdate.ticketsAvailable ?? 0),
+      0,
+    );
 
     const updatedEvent = await Event.findByIdAndUpdate(
       event._id,
-      { ...event, category: event.categoryId },
-      { new: true }
+      {
+        ...event,
+        category: event.categoryId,
+        ticketsAvailable: Math.max(event.capacity - ticketsSold, 0),
+      },
+      { new: true },
     );
     revalidatePath(path);
 
-    return JSON.parse(JSON.stringify(updatedEvent));
+    return serializeEvent(updatedEvent);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -98,7 +144,7 @@ export async function deleteEvent({ eventId, path }: DeleteEventParams) {
     const deletedEvent = await Event.findByIdAndDelete(eventId);
     if (deletedEvent) revalidatePath(path);
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -135,11 +181,11 @@ export async function getAllEvents({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -164,11 +210,11 @@ export async function getEventsByUser({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
@@ -196,10 +242,10 @@ export async function getRelatedEventsByCategory({
     const eventsCount = await Event.countDocuments(conditions);
 
     return {
-      data: JSON.parse(JSON.stringify(events)),
+      data: serializeEvents(events),
       totalPages: Math.ceil(eventsCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }

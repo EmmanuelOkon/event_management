@@ -1,9 +1,11 @@
 import { type ClassValue, clsx } from "clsx";
+import { format } from "date-fns/format";
+import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
 
 import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 
-import { RemoveUrlQueryParams, UrlQueryParams } from "@/types";
+import { IErrorResponse, RemoveUrlQueryParams, UrlQueryParams } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -66,6 +68,12 @@ export const formatPrice = (price: string) => {
   return formattedPrice;
 };
 
+export const formatTime = (iso: string) => format(new Date(iso), "h:mm a");
+export const formatDateLong = (iso: string) =>
+  format(new Date(iso), "EEEE, MMMM d, yyyy");
+export const formatRelative = (iso: string) =>
+  formatDistanceToNow(new Date(iso), { addSuffix: true });
+
 export function formUrlQuery({ params, key, value }: UrlQueryParams) {
   const currentUrl = qs.parse(params);
 
@@ -99,7 +107,58 @@ export function removeKeysFromQuery({
   );
 }
 
-export const handleError = (error: unknown) => {
+// export const handleError = (error: unknown): never => {
+//   console.error(error);
+//   throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+// };
+
+export const handleError = (error: unknown): never => {
   console.error(error);
-  throw new Error(typeof error === "string" ? error : JSON.stringify(error));
+
+  if (error instanceof Error) {
+    throw error;
+  }
+
+  if (typeof error === "string") {
+    throw new Error(error);
+  }
+
+  throw new Error("An unexpected error occurred");
 };
+
+export const formatDateToDashes = (date: Date): string => {
+  const year = date.getFullYear().toString();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+
+  return `${day}-${month}-${year}`;
+};
+
+export function getErrorMessage(error: unknown): string {
+  // React Query + Server Action errors
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  // Axios errors
+  const typedError = error as IErrorResponse;
+
+  const errorObject = typedError?.response?.data?.errors;
+  // const errorKeys = errorObject ? Object.keys(errorObject)[0] : null;
+
+  const firstError = errorObject
+    ? Object.values(errorObject).find(
+        (value): value is string[] => Array.isArray(value) && value.length > 0,
+      )?.[0]
+    : null;
+
+  if (firstError) {
+    return firstError;
+  }
+
+  if (typedError?.response?.data?.message) {
+    return typedError.response.data.message;
+  }
+
+  return "An unexpected error occurred";
+}
