@@ -8,26 +8,26 @@ import { SearchParamProps } from "@/types";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
+import Loading from "./loading";
 
-const ProfilePage = async ({ searchParams }: SearchParamProps) => {
-  const resolvedSearchParams = await searchParams;
-
-  if (!resolvedSearchParams?.tab) {
-    redirect("/profile?tab=organizing");
-  }
-
+async function ProfileContent({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const { sessionClaims } = await auth();
   const userId = sessionClaims?.userId as string;
 
-  const ordersPage = Number(resolvedSearchParams?.ordersPage) || 1;
-  const eventsPage = Number(resolvedSearchParams?.eventsPage) || 1;
+  const ordersPage = Number(searchParams?.ordersPage) || 1;
+  const eventsPage = Number(searchParams?.eventsPage) || 1;
 
   const orders = await getOrdersByUser({ userId, page: ordersPage });
 
   const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
   const organizedEvents = await getEventsByUser({ userId, page: eventsPage });
   const defaultTab =
-    resolvedSearchParams?.tab === "tickets" ? "tickets" : "organizing";
+    searchParams?.tab === "tickets" ? "tickets" : "organizing";
 
   return (
     <>
@@ -118,6 +118,23 @@ const ProfilePage = async ({ searchParams }: SearchParamProps) => {
         />
       </section>
     </>
+  );
+}
+
+const ProfilePage = async ({ searchParams }: SearchParamProps) => {
+  const resolvedSearchParams = await searchParams;
+
+  if (!resolvedSearchParams?.tab) {
+    redirect("/profile?tab=organizing");
+  }
+
+  return (
+    <Suspense
+      fallback={<Loading />}
+      key={JSON.stringify(resolvedSearchParams)}
+    >
+      <ProfileContent searchParams={resolvedSearchParams} />
+    </Suspense>
   );
 };
 
