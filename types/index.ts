@@ -27,6 +27,7 @@ export type CreateEventParams = {
     endDateTime: Date;
     categoryId: string;
     price: string;
+    capacity: number;
     isFree: boolean;
     url: string;
   };
@@ -45,6 +46,7 @@ export type UpdateEventParams = {
     endDateTime: Date;
     categoryId: string;
     price: string;
+    capacity: number;
     isFree: boolean;
     url: string;
   };
@@ -81,6 +83,8 @@ export type Event = {
   title: string;
   description: string;
   price: string;
+  capacity: number;
+  ticketsAvailable: number;
   isFree: boolean;
   imageUrl: string;
   location: string;
@@ -113,7 +117,7 @@ export type CheckoutOrderParams = {
 };
 
 export type GetTicketsByUserParams = {
-  eventTitle: string;
+  // eventTitle: string;
   eventId: string;
   buyerId: string;
 };
@@ -128,6 +132,11 @@ export type CreateOrderParams = {
 
 export type GetOrdersByEventParams = {
   eventId: string;
+  searchString: string;
+};
+
+export type GetOrdersByOrganizerParams = {
+  organizerId: string;
   searchString: string;
 };
 
@@ -153,3 +162,65 @@ export type SearchParamProps = {
   params?: Promise<{ id?: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
+// export interface Headers {
+//   Accept: string;
+//   "Content-Type": string;
+//   Authorization: string;
+// }
+
+export interface Data {
+  message: string;
+  errors: Errors;
+}
+
+export interface Errors {
+  email: string[];
+}
+
+export interface IResponseHeaders {
+  "cache-control": string;
+  "content-type": string;
+}
+
+export interface Transitional {
+  silentJSONParsing: boolean;
+  forcedJSONParsing: boolean;
+  clarifyTimeoutError: boolean;
+}
+
+export interface IResponse {
+  data: Data;
+  status: boolean;
+  statusText: string;
+  headers: IResponseHeaders;
+  config: Config;
+  request: Request;
+}
+
+export interface Config {
+  transitional: Transitional;
+  adapter: string[];
+  transformRequest: null[];
+  transformResponse: null[];
+  timeout: number;
+  xsrfCookieName: string;
+  xsrfHeaderName: string;
+  maxContentLength: number;
+  maxBodyLength: number;
+  headers: Headers;
+  baseURL: string;
+  method: string;
+  url: string;
+  data: string;
+}
+
+export interface IErrorResponse {
+  message: string;
+  name: string;
+  stack: string;
+  config: Config;
+  code: string;
+  status: boolean;
+  response: IResponse;
+}

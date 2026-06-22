@@ -1,17 +1,19 @@
+import { useGetAllEvents } from "@/components/hooks";
 import CategoryFilter from "@/components/shared/CategoryFilter";
 import Collection from "@/components/shared/Collection";
+import Hero from "@/components/shared/Hero";
 import Search from "@/components/shared/Search";
-import { Button } from "@/components/ui/button";
 import { getAllEvents } from "@/lib/actions/event.actions";
 import { SearchParamProps } from "@/types";
-import Image from "next/image";
-import Link from "next/link";
+
 
 export default async function Home({ searchParams }: SearchParamProps) {
   const resolvedSearchParams = await searchParams;
   const page = Number(resolvedSearchParams?.page) || 1;
   const searchText = (resolvedSearchParams?.query as string) || "";
   const category = (resolvedSearchParams?.category as string) || "";
+
+
 
   const events = await getAllEvents({
     query: searchText,
@@ -22,46 +24,33 @@ export default async function Home({ searchParams }: SearchParamProps) {
 
   return (
     <>
-      <section className="bg-primary-50 bg-dotted-pattern bg-contain py-5 md:py-10">
-        <div className="wrapper grid grid-cols-1 gap-5 md:grid-cols-2 2xl:gap-0">
-          <div className="flex flex-col justify-center gap-8">
-            <h1 className="h1-bold">
-              Host, Connect, Celebrate: Your Events, Our Platform!
-            </h1>
-            <p className="p-regular-20 md:p-regular-24">
-              Book and learn helpful tips from 3,168+ mentors in world-class
-              companies with our global community.
-            </p>
-            <Button size="lg" asChild className="button w-full sm:w-fit">
-              <Link href="#events">Explore Now</Link>
-            </Button>
-          </div>
-          <Image
-            src="/assets/images/hero.png"
-            alt="hero image"
-            width={1000}
-            height={1000}
-            className="max-h-[70vh] object-contain object-center 2xl:max-h-[50vh]"
-          />
-        </div>
-      </section>
+      <Hero eventCount={40} />
       <section
         id="events"
-        className="wrapper my-8 flex flex-col gap-8 md:gap-12"
+        className="wrapper my-7 flex flex-col gap-8 md:gap-12 z-10"
       >
-        <h2 className="h2-bold">
-          Trust by <br /> Thousands of Events and go
-        </h2>
+        <div className="flex flex-col gap-3">
+          <h2 className="h2-bold">
+            {/* Discover <br /> Thousands of Events and go Beyond Boundaries! */}
+            {/* <h1 className="text-5xl font-extrabold tracking-tight md:text-6xl"> */}
+            Discover Events, <br />{" "}
+            <span className="text-accent">Near and Far!</span>
+            {/* </h1> */}
+          </h2>
+          <p className="text-lg text-gray-600">
+            Hand-picked happenings, updated in real time.
+          </p>
+        </div>
 
+        <Search placeholder="Search events, places, or vibes…" />
         <div className="flex w-full flex-col gap-5 md:flex-row">
-          <Search />
           <CategoryFilter />
         </div>
 
         <Collection
           data={events?.data}
-          emptyTitle="No Events Found"
-          emptyStateSubtext="Please come back later"
+          emptyTitle="No events match."
+          emptyStateSubtext="Try a different category or clear your search."
           collectionType="All_Events"
           limit={6}
           page={page}

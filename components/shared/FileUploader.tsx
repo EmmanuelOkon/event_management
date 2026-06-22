@@ -1,7 +1,8 @@
 "use client";
 
 import { useDropzone } from "@uploadthing/react";
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { ImagePlus, X } from "lucide-react";
+import { Dispatch, MouseEvent, SetStateAction, useCallback } from "react";
 import {
   generateClientDropzoneAccept,
   generatePermittedFileTypes,
@@ -23,10 +24,22 @@ export function FileUploader({
   setFiles,
   routeConfig,
 }: FileUploaderProps) {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(acceptedFiles);
-    onFieldChange(convertFileToUrl(acceptedFiles[0]));
-  }, []);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      setFiles(acceptedFiles);
+      onFieldChange(convertFileToUrl(acceptedFiles[0]));
+    },
+    [onFieldChange, setFiles],
+  );
+
+  const removeImage = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onFieldChange("");
+      setFiles([]);
+    },
+    [onFieldChange, setFiles],
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -40,33 +53,37 @@ export function FileUploader({
   return (
     <div
       {...getRootProps()}
-      className="flex-center bg-dark-3 flex h-72 cursor-pointer flex-col overflow-hidden rounded-xl bg-grey-50"
+      className=" bg-dark-3 relative overflow-hidden rounded-none bg-grey-50 h-full"
     >
       <input {...getInputProps()} className="cursor-pointer" />
 
       {imageUrl ? (
-        <div className="flex h-full w-full flex-1 justify-center ">
+        <div className="flex h-full w-full flex-1 justify-center relative border border-border rounded-none overflow-hidden">
           <img
             src={imageUrl}
             alt="image"
-            width={250}
-            height={250}
-            className="w-full object-cover object-center"
+            className="w-full object-cover aspect-[21/9] "
           />
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            onClick={removeImage}
+            className="absolute right-3 top-3 h-8 w-8 rounded-none cursor-pointer p-0 hover:text-destructive"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       ) : (
-        <div className="flex-center flex-col py-5 text-grey-500">
-          <img
-            src="/assets/icons/upload.svg"
-            width={77}
-            height={77}
-            alt="file upload"
-          />
-          <h3 className="mb-2 mt-2">Drag photo here</h3>
-          <p className="p-medium-12 mb-4">SVG, PNG, JPG</p>
-          <Button type="button" className="rounded-md">
-            Select from computer
-          </Button>
+        <div className="flex aspect-[21/9] cursor-pointer flex-col items-center justify-center border-2 border-dashed bg-card text-center transition-all duration-300 hover:border-black/50 rounded-none">
+          <div className="flex h-12 w-12 items-center justify-center rounded-none bg-muted">
+            <ImagePlus className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          <h3 className="mb-2mt-2">Drop an image, or click to upload</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            PNG, JPG up to 4MB
+          </p>
         </div>
       )}
     </div>

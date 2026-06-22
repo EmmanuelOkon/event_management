@@ -1,10 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import {
   CheckoutOrderParams,
   CreateOrderParams,
   GetOrdersByEventParams,
+  GetOrdersByOrganizerParams,
   GetOrdersByUserParams,
   GetTicketsByUserParams,
 } from "@/types";
@@ -22,6 +24,19 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
   const price = order.isFree ? 0 : Number(order.price) * 100;
 
   try {
+    await connectToDatabase();
+
+    const event = await Event.findById(order.eventId).select(
+      "ticketsAvailable",
+    );
+    if (
+      !event ||
+      typeof event.ticketsAvailable !== "number" ||
+      event.ticketsAvailable <= 0
+    ) {
+      throw new Error("No tickets available for this event");
+    }
+
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -40,8 +55,8 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
         buyerId: order.buyerId,
       },
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
+      success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile?tab=tickets`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/events/${order.eventId}`,
     });
 
     redirect(session.url!);
@@ -60,9 +75,22 @@ export const createOrder = async (order: CreateOrderParams) => {
       buyer: order.buyerId,
     });
 
+    const updatedEvent = await Event.findOneAndUpdate(
+      { _id: order.eventId, ticketsAvailable: { $gt: 0 } },
+      { $inc: { ticketsAvailable: -1 } },
+    );
+    if (!updatedEvent) {
+      await Order.findByIdAndDelete(newOrder._id);
+      throw new Error("No tickets available for this event");
+    }
+
+    revalidatePath("/");
+    revalidatePath("/profile?tab=tickets");
+    revalidatePath(`/events/${order.eventId}`);
+
     return JSON.parse(JSON.stringify(newOrder));
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 };
 
@@ -124,7 +152,77 @@ export async function getOrdersByEvent({
 
     return JSON.parse(JSON.stringify(orders));
   } catch (error) {
-    handleError(error);
+    return handleError(error);
+  }
+}
+
+export async function getOrdersByOrganizer({
+  organizerId,
+  searchString,
+}: GetOrdersByOrganizerParams) {
+  try {
+    await connectToDatabase();
+
+    if (!organizerId) throw new Error("Organizer ID is required");
+    const organizerObjectId = new ObjectId(organizerId);
+
+    const orders = await Order.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "buyer",
+          foreignField: "_id",
+          as: "buyer",
+        },
+      },
+      {
+        $unwind: "$buyer",
+      },
+      {
+        $lookup: {
+          from: "events",
+          localField: "event",
+          foreignField: "_id",
+          as: "event",
+        },
+      },
+      {
+        $unwind: "$event",
+      },
+      {
+        $match: {
+          $and: [
+            { "event.organizer": organizerObjectId },
+            {
+              buyer: {
+                $regex: RegExp(searchString, "i"),
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          totalAmount: 1,
+          createdAt: 1,
+          eventTitle: "$event.title",
+          eventId: "$event._id",
+          buyer: {
+            $concat: ["$buyer.firstName", " ", "$buyer.lastName"],
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ]);
+
+    return JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    return handleError(error);
   }
 }
 
@@ -164,22 +262,24 @@ export async function getOrdersByUser({
       totalPages: Math.ceil(ordersCount / limit),
     };
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
 
 export async function hasUserBoughtTicket({
-  eventTitle,
   buyerId,
   eventId,
 }: GetTicketsByUserParams) {
   try {
     await connectToDatabase();
 
-    const paidEvent = await Order.findOne({ eventTitle, buyerId, eventId });
+    const paidEvent = await Order.findOne({
+      event: eventId,
+      buyer: buyerId,
+    });
 
     return !!paidEvent;
   } catch (error) {
-    handleError(error);
+    return handleError(error);
   }
 }
