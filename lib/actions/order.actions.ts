@@ -6,6 +6,7 @@ import {
   CheckoutOrderParams,
   CreateOrderParams,
   GetOrdersByEventParams,
+  GetOrdersByOrganizerParams,
   GetOrdersByUserParams,
   GetTicketsByUserParams,
 } from "@/types";
@@ -54,8 +55,8 @@ export const checkoutOrder = async (order: CheckoutOrderParams) => {
         buyerId: order.buyerId,
       },
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/`,
+      success_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/profile?tab=tickets`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/events/${order.eventId}`,
     });
 
     redirect(session.url!);
@@ -84,7 +85,7 @@ export const createOrder = async (order: CreateOrderParams) => {
     }
 
     revalidatePath("/");
-    revalidatePath("/profile");
+    revalidatePath("/profile?tab=tickets");
     revalidatePath(`/events/${order.eventId}`);
 
     return JSON.parse(JSON.stringify(newOrder));
@@ -145,6 +146,76 @@ export async function getOrdersByEvent({
             { eventId: eventObjectId },
             { buyer: { $regex: RegExp(searchString, "i") } },
           ],
+        },
+      },
+    ]);
+
+    return JSON.parse(JSON.stringify(orders));
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function getOrdersByOrganizer({
+  organizerId,
+  searchString,
+}: GetOrdersByOrganizerParams) {
+  try {
+    await connectToDatabase();
+
+    if (!organizerId) throw new Error("Organizer ID is required");
+    const organizerObjectId = new ObjectId(organizerId);
+
+    const orders = await Order.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "buyer",
+          foreignField: "_id",
+          as: "buyer",
+        },
+      },
+      {
+        $unwind: "$buyer",
+      },
+      {
+        $lookup: {
+          from: "events",
+          localField: "event",
+          foreignField: "_id",
+          as: "event",
+        },
+      },
+      {
+        $unwind: "$event",
+      },
+      {
+        $match: {
+          $and: [
+            { "event.organizer": organizerObjectId },
+            {
+              buyer: {
+                $regex: RegExp(searchString, "i"),
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          totalAmount: 1,
+          createdAt: 1,
+          eventTitle: "$event.title",
+          eventId: "$event._id",
+          buyer: {
+            $concat: ["$buyer.firstName", " ", "$buyer.lastName"],
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
         },
       },
     ]);

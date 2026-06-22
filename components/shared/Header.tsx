@@ -1,8 +1,9 @@
 "use client";
 
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show } from "@clerk/nextjs";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import HeaderUserMenu from "./HeaderUserMenu";
 import MobileNav from "./MobileNav";
 import NavItems from "./NavItems";
 
@@ -15,14 +16,6 @@ const Header = () => {
             Evoria.
           </span>
         </Link>
-        {/* <Link href="/" className="w-36">
-          <Image
-            src="/assets/images/logo.svg"
-            width={128}
-            height={38}
-            alt="Evently Logo"
-          />
-        </Link> */}
 
         <div className="flex items-center gap-3">
           <Show when="signed-in">
@@ -33,7 +26,7 @@ const Header = () => {
 
           <Show when="signed-in">
             <div className="flex items-center gap-3">
-              <UserButton />
+              <HeaderUserMenu />
               <MobileNav />
             </div>
           </Show>

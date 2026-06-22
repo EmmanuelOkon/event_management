@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 
 const EventDetailsSkeleton = () => {
   return (
-    <article className="mx-auto max-w-7xl px-6 py-12 space-y-12">
+    <article className="mx-auto max-w-6xl px-6 py-12 space-y-12">
       <Skeleton className="aspect-[21/9] w-full rounded-none" />
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr]">

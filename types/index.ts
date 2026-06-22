@@ -135,6 +135,11 @@ export type GetOrdersByEventParams = {
   searchString: string;
 };
 
+export type GetOrdersByOrganizerParams = {
+  organizerId: string;
+  searchString: string;
+};
+
 export type GetOrdersByUserParams = {
   userId: string | null;
   limit?: number;
