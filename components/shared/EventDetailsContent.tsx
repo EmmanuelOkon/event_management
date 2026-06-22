@@ -165,7 +165,7 @@ const OrganizerSidebar = ({
                   <span className="font-semibold text-black">
                     {event.title}
                   </span>
-                  . This cannot be undone.
+                  . This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -173,7 +173,7 @@ const OrganizerSidebar = ({
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction className="bg-destructive text-white rounded-none cursor-pointer hover:bg-red-700 transition-all duration-300 ease-in-out">
-                  Delete event
+                  Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

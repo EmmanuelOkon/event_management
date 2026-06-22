@@ -1,7 +1,7 @@
 "use client";
 
 import type { Event as EventType } from "@/types";
-import { useAuth } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Edit, Ticket, Users } from "lucide-react";
 import Link from "next/link";
 import { DeleteConfirmation } from "./DeleteConfirmation";
@@ -15,10 +15,11 @@ type CardProps = {
 };
 
 const Card = ({ event, hasOrderLink, hidePrice, index = 0 }: CardProps) => {
-  const { userId } = useAuth();
+  const { user } = useUser();
+  const userId = user?.publicMetadata.userId as string | undefined;
   // const isEventCreator = !!userId && userId === String(event.organizer._id);
 
-  const isEventCreator = userId === event.organizer._id.toString();
+  const isEventCreator = !!userId && userId === String(event.organizer._id);
   const capacity = event.capacity ?? 0;
   const ticketsAvailable = event.ticketsAvailable ?? capacity;
   const attendeesCount = Math.max(capacity - ticketsAvailable, 0);

@@ -1,50 +1,54 @@
 "use client";
 
-import { useTransition } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
+import { useTransition } from "react";
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { deleteEvent } from "@/lib/actions/event.actions";
 import { Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
 
 export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger className="hover:bg-red-100 p-3 text-destructive transition-all cursor-pointer">
+    <Dialog>
+      <DialogTrigger className="hover:bg-red-100 p-3 text-destructive transition-all cursor-pointer">
         <Trash2 className="h-4 w-4" />
-      </AlertDialogTrigger>
+      </DialogTrigger>
 
-      <AlertDialogContent className="bg-white rounded-none ">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="font-serif text-2xl font-semibold">
-            Are you sure you want to delete?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="p-regular-16 text-grey-600">
-            This will permanently delete this event
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+      <DialogContent className="bg-white rounded-none ">
+        <div className="inline-flex h-12 w-12 items-center justify-center rounded-none bg-red-50 text-red-500">
+          <Trash2 className="h-5 w-5" />
+        </div>
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl font-semibold">
+            Delete Event
+          </DialogTitle>
+          <DialogDescription className="p-regular-16 text-grey-600">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-black">name</span>? This action cannot be
+            undone.
+          </DialogDescription>
+        </DialogHeader>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-none hover:bg-primary/40 hover:text-black cursor-pointer ">
+        <DialogFooter>
+          <DialogClose className="border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-semibold hover:bg-primary/40 hover:text-black transition disabled:pointer-events-none disabled:opacity-60 cursor-pointer">
             Cancel
-          </AlertDialogCancel>
+          </DialogClose>
 
-          <AlertDialogAction
+          <Button
             className="rounded-none cursor-pointer bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-600"
             onClick={() =>
               startTransition(async () => {
@@ -53,9 +57,9 @@ export const DeleteConfirmation = ({ eventId }: { eventId: string }) => {
             }
           >
             {isPending ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
